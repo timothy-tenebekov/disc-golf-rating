@@ -1,0 +1,39 @@
+html
+    head
+        title Раунды
+        style.
+            body, html {
+                margin: auto;
+                padding: 0;
+                width: 80%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            table, th, td {
+                margin: auto;
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+
+            h2, h3 {
+                margin: auto;
+                text-align: center;
+            }
+    body
+        h2 Раунды
+        table
+            tr
+                th Название
+                th Дата
+                th Трасса
+            each val in rounds
+                tr
+                    td
+                        a(href= '/round/' + val.id)= val.name
+                    td= val.datetime.toLocaleString()
+                    td
+                        a(href= '/course/' + val.courseId)= val.courseName
+        h3
+            a(href= '/rating') Рейтинг
+

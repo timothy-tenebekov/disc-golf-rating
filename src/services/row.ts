@@ -14,6 +14,7 @@ export interface PlayerRow {
 
 export interface RoundRow {
     id: number;
+    name: string | null;
     datetime: Date | null;
     baskets: number | null;
     course_id: number | null;
@@ -31,13 +32,24 @@ export interface ResultRow {
     round_rating: number | null;
 }
 
-export interface ResultJoinedRow extends ResultRow {
+export interface ResultJoinedRoundRow extends ResultRow {
     datetime: Date | null;
     baskets: number | null;
+}
+
+export interface ResultJoinedPlayerRow extends ResultRow {
+    metrix_name: string;
 }
 
 export interface RatingRow {
     player_id: number;
     date: Date;
     rating: number;
+}
+
+export interface RatingJoinedPlayerRow {
+    player_id: number;
+    date: Date;
+    rating: number;
+    metrix_name: string;
 }

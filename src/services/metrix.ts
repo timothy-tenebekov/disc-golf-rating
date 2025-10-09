@@ -1,6 +1,7 @@
+import he from "he";
 import RatingError from "./error";
 
-export interface PlayerResult {
+export interface MetrixPlayerResult {
     id: number | null;
     name: string;
     className: string;
@@ -8,13 +9,13 @@ export interface PlayerResult {
     dnf: boolean;
 }
 
-export interface RoundResult {
+export interface MetrixRoundResult {
     name: string;
     datetime: Date;
     courseId: number;
     courseName: string;
     baskets: number;
-    playerResults: PlayerResult[];
+    playerResults: MetrixPlayerResult[];
 }
 
 interface MetrixResult {
@@ -44,7 +45,7 @@ interface MetrixResponse {
 }
 
 export default class MetrixService {
-    async getRoundResult(roundId: number): Promise<RoundResult> {
+    async getRoundResult(roundId: number): Promise<MetrixRoundResult> {
         // TODO: add validation
         const res = await fetch(`https://discgolfmetrix.com/api.php?content=result&id=${roundId}`);
         const response = await res.json() as MetrixResponse;
@@ -53,7 +54,7 @@ export default class MetrixService {
             throw new RatingError(RatingError.METRIX_ROUND_NOT_FOUND);
         }
 
-        const playerResults: PlayerResult[] = [];
+        const playerResults: MetrixPlayerResult[] = [];
         for (const result of competition.Results) {
             playerResults.push({
                 id: result.UserID,
@@ -65,12 +66,16 @@ export default class MetrixService {
         }
 
         return {
-            name: competition.Name,
+            name: MetrixService.decodeHtml(competition.Name),
             datetime: new Date(competition.Date + ' ' + competition.Time),
             courseId: competition.CourseID,
-            courseName: competition.CourseName,
+            courseName: MetrixService.decodeHtml(competition.CourseName),
             baskets: competition.Tracks.length,
             playerResults: playerResults
         }
+    }
+
+    private static decodeHtml(str: string): string {
+        return he.decode(str);
     }
 }

@@ -1,7 +1,48 @@
-import {Knex} from 'knex';
+import {Knex, QueryBuilder} from 'knex';
 import RatingError from './error';
-import {PlayerRow, RatingRow, ResultJoinedRow, ResultRow, RoundRow, SettingRow} from "./row";
-import {RoundResult} from "./metrix";
+import {
+    PlayerRow, RatingJoinedPlayerRow, RatingRow,
+    ResultJoinedPlayerRow, ResultJoinedRoundRow, ResultRow, RoundRow, SettingRow
+} from "./row";
+import {MetrixRoundResult} from "./metrix";
+
+export interface PlayerRating {
+    id: number;
+    metrixName: string;
+    rating: number;
+}
+
+export interface RatingsData {
+    date: Date;
+    ratings: PlayerRating[];
+}
+
+export interface RoundData {
+    id: number;
+    name: string;
+    datetime: Date;
+    courseId: number;
+    courseName: string;
+}
+
+export interface PlayerRoundResult {
+    id: number;
+    metrixName: string;
+    result: number;
+    playerRating: number;
+    roundRating: number;
+}
+
+export interface RoundResult {
+    id: number;
+    name: string;
+    datetime: Date;
+    courseId: number;
+    courseName: string;
+    parRating: number;
+    pointRating: number;
+    results: PlayerRoundResult[];
+}
 
 interface PlayerResult {
     id: number;
@@ -38,7 +79,7 @@ export default class RatingService {
         }
     }
 
-    async processRound(roundId: number, roundResult: RoundResult, force: boolean): Promise<void> {
+    async processRound(roundId: number, roundResult: MetrixRoundResult, force: boolean): Promise<void> {
         return this.knex.transaction(async trx => {
             const roundRow = await trx<RoundRow>('rounds')
                 .first()
@@ -52,6 +93,7 @@ export default class RatingService {
 
             await trx<RoundRow>('rounds')
                 .update({
+                    name: roundResult.name,
                     datetime: roundResult.datetime,
                     course_id: roundResult.courseId,
                     course_name: roundResult.courseName,
@@ -128,7 +170,95 @@ export default class RatingService {
         });
     }
 
-    async getPlayerRating(builder: Knex, playerId: number, date: Date): Promise<number | null> {
+    async getRatings(date: Date): Promise<RatingsData | null> {
+        const ratingRow = await this.knex('ratings')
+            .max({max_date: 'date'})
+            .where('date', '<=', date)
+            .first() as { max_date: Date | null };
+        const ratingDate = ratingRow.max_date;
+        if (!ratingDate) {
+            return null;
+        }
+        const ratingRows = await this.knex({r: 'ratings'})
+            .select()
+            .leftJoin({p: 'players'}, {'r.player_id': 'p.id'})
+            .where({'r.date': ratingDate})
+            .orderBy('r.rating', 'desc') as RatingJoinedPlayerRow[];
+        const ratings = ratingRows.map(row => ({
+            id: row.player_id,
+            metrixName: row.metrix_name,
+            rating: row.rating
+        } as PlayerRating));
+        return {date: ratingDate, ratings: ratings};
+    }
+
+    async getRatingDates(): Promise<Date[]> {
+        const ratingRows = await this.knex<RatingRow>('ratings')
+            .distinct('date')
+            .orderBy('date', 'desc');
+        return ratingRows.map(row => row.date);
+    }
+
+    async getRoundIdsForProcess(force: boolean): Promise<number[]> {
+        const roundRows = await this.knex<RoundRow>('rounds')
+            .select()
+            .orderBy('datetime', 'asc');
+        const ids: number[] = [];
+        for (const roundRow of roundRows) {
+            if (!roundRow.processed || force) {
+                ids.push(roundRow.id);
+            }
+        }
+        return ids;
+    }
+
+    async getRounds(): Promise<RoundData[]> {
+        const roundRows = await this.knex<RoundRow>('rounds')
+            .select()
+            .where({processed: true})
+            .orderBy('datetime', 'desc');
+        return roundRows.map(row => ({
+            id: row.id,
+            name: row.name,
+            datetime: row.datetime,
+            courseId: row.course_id,
+            courseName: row.course_name
+        } as RoundData));
+    }
+
+    async getRound(roundId: number): Promise<RoundResult> {
+        const roundRow = await this.knex<RoundRow>('rounds')
+            .first()
+            .where({id: roundId})
+            .andWhere({processed: true});
+        if (!roundRow || !roundRow.name || !roundRow.datetime || !roundRow.course_id || !roundRow.course_name || !roundRow.par_rating || !roundRow.point_rating) {
+            throw new RatingError(RatingError.ROUND_NOT_FOUND);
+        }
+        const resultRows = await this.knex<ResultJoinedPlayerRow>({r: 'results'})
+            .select()
+            .leftJoin({p: 'players'}, {'r.player_id': 'p.id'})
+            .where({'r.round_id': roundId})
+            .orderBy('r.result');
+        const results = resultRows.map(row => ({
+            id: row.player_id,
+            metrixName: row.metrix_name,
+            result: row.result,
+            playerRating: row.player_rating,
+            roundRating: row.round_rating
+        } as PlayerRoundResult));
+        return {
+            id: roundRow.id,
+            name: roundRow.name,
+            datetime: roundRow.datetime,
+            courseId: roundRow.course_id,
+            courseName: roundRow.course_name,
+            parRating: roundRow.par_rating,
+            pointRating: roundRow.point_rating,
+            results: results
+        };
+    }
+
+    private async getPlayerRating(builder: Knex, playerId: number, date: Date): Promise<number | null> {
         const ratingRow = await builder<RatingRow>('ratings')
             .first()
             .where({player_id: playerId})
@@ -199,13 +329,12 @@ export default class RatingService {
         const minDate = new Date(date.getFullYear() - 1, date.getMonth(), date.getDate());
         const maxDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
-        // TODO: limit date to 1 year to the past
         const resultRows = await builder({a: 'results'})
             .select('a.*', 'b.datetime', 'b.baskets')
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where('b.datetime', '>', minDate)
             .andWhere('b.datetime', '<', maxDate)
-            .orderBy([{column: 'a.player_id'}, {column: 'b.datetime', order: 'desc'}]) as ResultJoinedRow[];
+            .orderBy([{column: 'a.player_id'}, {column: 'b.datetime', order: 'desc'}]) as ResultJoinedRoundRow[];
         const ratings: Map<number, number> = new Map();
         let playerId = 0;
         let sum = 0;

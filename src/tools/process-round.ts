@@ -16,15 +16,16 @@ async function main() {
         }
         const roundId = parseInt(args[0]);
         const force = args.length >= 2 && parseInt(args[1]) != 0;
-        if (!roundId) {
-            throw usage();
+
+        const roundIds: number[] = roundId != 0 ? [roundId] : await ratingService.getRoundIdsForProcess(force);
+
+        for (const roundId of roundIds) {
+            const roundResult = await metrixService.getRoundResult(roundId);
+            console.info(`Round: ${roundResult.name} ${roundResult.datetime.toISOString()}`);
+
+            await ratingService.processRound(roundId, roundResult, force);
+            console.info(`Round processed`);
         }
-
-        const roundResult = await metrixService.getRoundResult(roundId);
-        console.info(`Round: ${roundResult.name} ${roundResult.datetime.toISOString()}`);
-
-        await ratingService.processRound(roundId, roundResult, force);
-        console.info(`Round processed`);
     }
     finally {
         if (knex) {
