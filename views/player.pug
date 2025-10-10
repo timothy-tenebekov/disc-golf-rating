@@ -1,6 +1,6 @@
 html
     head
-        title Раунд
+        title Игрок
         style.
             body, html {
                 margin: auto;
@@ -30,22 +30,26 @@ html
                 text-align: center;
             }
     body
-        h2= 'Раунд ' + round.name
+        h2= 'Игрок ' + player.metrixName
         h3
-            a(href= 'https://discgolfmetrix.com/' + round.id) Metrix
+            a(href= 'https://discgolfmetrix.com/player/' + player.id) Metrix
+        h3= 'Текущий рейтинг ' + player.rating
         table
             tr
-                th(class="col-center") Игрок
+                th(class="col-center") Раунд
+                th(class="col-center") Дата
+                th(class="col-center") Трасса
                 th(class="col-center") Результат
-                th(class="col-center") Текущий<br>рейтинг
                 th(class="col-center") Рейтинг<br>за раунд
-            each val in round.results
+            each val in player.rounds
                 tr
                     td(class="col-left")
-                        a(href= '/player/' + val.id)= val.metrixName
+                        a(href= '/round/' + val.id)= val.name
+                    td(class="col-center")= val.datetime.toLocaleString()
+                    td(class="col-left")
+                        a(href= '/course/' + val.courseId)= val.courseName
                     td(class="col-center")= val.result
-                    td(class="col-center")= val.playerRating
-                    td(class="col-center")= val.roundRating
+                    td(class="col-center")= val.rating
         h3
             a(href= '/rating') Рейтинг
             | 

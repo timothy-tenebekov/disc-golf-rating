@@ -19,6 +19,7 @@ class Router {
         this.router.get('/rating{/:date}', this.rating);
         this.router.get('/rounds', this.rounds);
         this.router.get('/round{/:id}', this.round);
+        this.router.get('/player{/:id}', this.player);
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
@@ -63,6 +64,21 @@ class Router {
 
             res.render('round', {
                 round: round
+            });
+        } catch (e) {
+            //Router.logError(e);
+            res.status(500);
+        }
+    };
+
+    private readonly player: RouterCallback = async (req, res) => {
+        //Router.logRequest(req);
+        try {
+            const playerId = parseInt(req.params['id']);
+            const player = await this.ratingService.getPlayer(playerId);
+
+            res.render('player', {
+                player: player
             });
         } catch (e) {
             //Router.logError(e);
