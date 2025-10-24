@@ -1,45 +1,26 @@
-html
-    head
-        title Рейтинг
-        style.
-            body, html {
-                margin: auto;
-                padding: 0;
-                width: 80%;
-                height: 100%;
-                overflow: hidden;
-            }
+extends base.pug
 
-            table, th, td {
-                margin: auto;
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
+block head
+    title Рейтинг
 
-            h2, h3 {
-                margin: auto;
-                text-align: center;
-            }
-
-    body
-        if date
-            h2= 'Рейтинг на ' + date
-        else
-            p Рейтинг не найден
-        if ratings
-            table
+block center-panel
+    if date
+        h2= 'Рейтинг на ' + date
+    else
+        p Рейтинг не найден
+    if ratings
+        table
+            tr
+                th(class="col-center") Игрок
+                th(class="col-center") Рейтинг
+            each val in ratings
                 tr
-                    th Игрок
-                    th Рейтинг
-                each val in ratings
-                    tr
-                        td
-                            a(href= '/player/' + val.id)= val.metrixName
-                        td= val.rating
-            p Даты
-            each date in dates
-                a(href= '/rating/' + date)= date
-                br
-        h3
-            a(href= '/rounds') Раунды
+                    td(class="col-left")
+                        a(href= '/player/' + val.id)= val.metrixName
+                    td(class="col-center")= val.rating
 
+block right-panel
+    h3 Даты
+    each date in dates
+        a(href= '/rating/' + date)= date
+        br

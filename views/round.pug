@@ -1,52 +1,24 @@
-html
-    head
-        title Раунд
-        style.
-            body, html {
-                margin: auto;
-                padding: 0;
-                width: 80%;
-                height: 100%;
-                overflow: hidden;
-            }
+extends base.pug
 
-            table, th, td {
-                margin: auto;
-                border: 1px solid black;
-                border-collapse: collapse;
-                text-align: center;
-            }
+block head
+    title Раунд
 
-            .col-left {
-                text-align: left;
-            }
-
-            .col-center {
-                text-align: center;
-            }
-
-            h2, h3 {
-                margin: auto;
-                text-align: center;
-            }
-    body
-        h2= 'Раунд ' + round.name
-        h3
-            a(href= 'https://discgolfmetrix.com/' + round.id) Metrix
-        table
+block center-panel
+    h2= 'Раунд: ' + round.name
+    if round.courseName
+        h3= 'Трасса: ' + round.courseName
+    h3
+        a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
+    table
+        tr
+            th(class="col-center") Игрок
+            th(class="col-center") Результат
+            th(class="col-center") Текущий<br>рейтинг
+            th(class="col-center") Рейтинг<br>за раунд
+        each val in round.results
             tr
-                th(class="col-center") Игрок
-                th(class="col-center") Результат
-                th(class="col-center") Текущий<br>рейтинг
-                th(class="col-center") Рейтинг<br>за раунд
-            each val in round.results
-                tr
-                    td(class="col-left")
-                        a(href= '/player/' + val.id)= val.metrixName
-                    td(class="col-center")= val.result
-                    td(class="col-center")= val.playerRating
-                    td(class="col-center")= val.roundRating
-        h3
-            a(href= '/rating') Рейтинг
-            | 
-            a(href= '/rounds') Раунды
+                td(class="col-left")
+                    a(href= '/player/' + val.id)= val.metrixName
+                td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
+                td(class="col-center")= val.playerRating
+                td(class="col-center")= val.roundRating

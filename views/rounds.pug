@@ -1,39 +1,18 @@
-html
-    head
-        title Раунды
-        style.
-            body, html {
-                margin: auto;
-                padding: 0;
-                width: 80%;
-                height: 100%;
-                overflow: hidden;
-            }
+extends base.pug
 
-            table, th, td {
-                margin: auto;
-                border: 1px solid black;
-                border-collapse: collapse;
-            }
+block head
+    title Раунды
 
-            h2, h3 {
-                margin: auto;
-                text-align: center;
-            }
-    body
-        h2 Раунды
-        table
+block center-panel
+    h2 Раунды
+    table
+        tr
+            th(class="col-center") Название
+            th(class="col-center") Дата
+            th(class="col-center") Трасса
+        each val in rounds
             tr
-                th Название
-                th Дата
-                th Трасса
-            each val in rounds
-                tr
-                    td
-                        a(href= '/round/' + val.id)= val.name
-                    td= val.datetime.toLocaleString()
-                    td
-                        a(href= '/course/' + val.courseId)= val.courseName
-        h3
-            a(href= '/rating') Рейтинг
-
+                td(class="col-left")
+                    a(href= '/round/' + val.id)= val.name
+                td(class="col-center")= val.datetime.toLocaleString()
+                td(class="col-left")= val.courseName

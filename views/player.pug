@@ -1,56 +1,25 @@
-html
-    head
-        title Игрок
-        style.
-            body, html {
-                margin: auto;
-                padding: 0;
-                width: 80%;
-                height: 100%;
-                overflow: hidden;
-            }
+extends base.pug
 
-            table, th, td {
-                margin: auto;
-                border: 1px solid black;
-                border-collapse: collapse;
-                text-align: center;
-            }
+block head
+    title Игрок
 
-            .col-left {
-                text-align: left;
-            }
-
-            .col-center {
-                text-align: center;
-            }
-
-            h2, h3 {
-                margin: auto;
-                text-align: center;
-            }
-    body
-        h2= 'Игрок ' + player.metrixName
-        h3
-            a(href= 'https://discgolfmetrix.com/player/' + player.id) Metrix
-        h3= 'Текущий рейтинг ' + player.rating
-        table
+block center-panel
+    h2= 'Игрок: ' + player.metrixName
+    h3= 'Текущий рейтинг: ' + player.rating
+    h3
+        a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
+    table
+        tr
+            th(class="col-center") Раунд
+            th(class="col-center") Дата
+            th(class="col-center") Трасса
+            th(class="col-center") Результат
+            th(class="col-center") Рейтинг<br>за раунд
+        each val in player.rounds
             tr
-                th(class="col-center") Раунд
-                th(class="col-center") Дата
-                th(class="col-center") Трасса
-                th(class="col-center") Результат
-                th(class="col-center") Рейтинг<br>за раунд
-            each val in player.rounds
-                tr
-                    td(class="col-left")
-                        a(href= '/round/' + val.id)= val.name
-                    td(class="col-center")= val.datetime.toLocaleString()
-                    td(class="col-left")
-                        a(href= '/course/' + val.courseId)= val.courseName
-                    td(class="col-center")= val.result
-                    td(class="col-center")= val.rating
-        h3
-            a(href= '/rating') Рейтинг
-            | 
-            a(href= '/rounds') Раунды
+                td(class="col-left")
+                    a(href= '/round/' + val.id)= val.name
+                td(class="col-center")= val.datetime.toLocaleString()
+                td(class="col-left")= val.courseName
+                td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
+                td(class="col-center")= val.rating
