@@ -7,6 +7,7 @@ block center-panel
     h2= 'Раунд: ' + round.name
     if round.courseName
         h3= 'Трасса: ' + round.courseName
+    h3= 'Дата: ' + round.datetime.toLocaleString()
     h3
         a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
     table
@@ -22,3 +23,53 @@ block center-panel
                 td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
                 td(class="col-center")= val.playerRating
                 td(class="col-center")= val.roundRating
+    br
+    if round.parRating > 0
+        canvas#chart
+
+block script
+    script(src='https://cdn.jsdelivr.net/npm/chart.js')
+    script.
+        const data = !{JSON.stringify(round)};
+        const ctx = document.getElementById('chart').getContext('2d');
+        const results = data.results.filter(item => item.playerRating > 0);
+        const minResult = Math.min(results.at(0).result, 0);
+        const maxResult = results.at(-1).result;
+        const minRating = data.parRating - data.pointRating * minResult;
+        const maxRating = data.parRating - data.pointRating * maxResult;
+        new Chart(ctx, {
+            data: {
+                labels: results.map(item => item.metrixName),
+                datasets: [
+                    {
+                        type: "scatter",
+                        label: 'Results',
+                        data: results.map(item => ({
+                            x: item.result,
+                            y: item.playerRating
+                        }))
+                    },
+                    {
+                        type: "line",
+                        label: "Rating",
+                        data: [[minResult, minRating], [maxResult, maxRating]]
+                    }
+                ],
+            },
+            options: {
+                responsive: false,
+                scales: {
+                    x: {
+                        reverse: true,
+                        min: minResult,
+                        max: maxResult,
+                        offset: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });

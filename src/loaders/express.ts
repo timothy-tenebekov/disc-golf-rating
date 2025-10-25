@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser';
 import compression from 'compression';
-import {Application} from "express";
+import express, {Application} from "express";
 import morgan from 'morgan';
 import api from '../api';
 import {LoggerStream} from './logger';
@@ -16,5 +16,6 @@ export default (app: Application, ratingService: RatingService): void => {
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(morgan('short', {stream: new LoggerStream()}));
 
+    app.use(express.static('public'));
     app.use('/', api(ratingService));
 }
