@@ -15,7 +15,7 @@ block center-panel
             th(class="col-center") Трасса
             th(class="col-center") Результат
             th(class="col-center") Рейтинг<br>за раунд
-        each val in player.rounds
+        each val in rounds
             tr
                 td(class="col-left")
                     a(href= '/round/' + val.id)= val.name

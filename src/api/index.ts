@@ -47,18 +47,22 @@ class Router {
     private readonly round: RouterCallback = async (req, res) => {
         const roundId = parseInt(req.params['id']);
         const round = await this.ratingService.getRound(roundId);
+        const results = await this.ratingService.getRoundResults(roundId);
 
         res.render('round', {
-            round: round
+            round: round,
+            results: results
         });
     }
 
     private readonly player: RouterCallback = async (req, res) => {
         const playerId = parseInt(req.params['id']);
         const player = await this.ratingService.getPlayer(playerId);
+        const rounds = await this.ratingService.getPlayerRounds(playerId);
 
         res.render('player', {
-            player: player
+            player: player,
+            rounds: rounds
         });
     };
 

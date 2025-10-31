@@ -1,4 +1,4 @@
-import {Knex, QueryBuilder} from 'knex';
+import {Knex} from 'knex';
 import RatingError from './error';
 import {
     PlayerRow, RatingJoinedPlayerRow, RatingRow,
@@ -6,23 +6,26 @@ import {
 } from "./row";
 import {MetrixRoundResult} from "./metrix";
 
-export interface RatingPlayerData {
+export interface PlayerData {
     id: number;
     metrixName: string;
-    rating: number;
+    rating: number | null;
 }
 
 export interface RatingsData {
     date: Date;
-    ratings: RatingPlayerData[];
+    ratings: PlayerData[];
 }
 
-export interface RoundShortData {
+export interface RoundData {
     id: number;
-    name: string;
-    datetime: Date;
-    courseId: number;
-    courseName: string;
+    name: string | null;
+    datetime: Date | null;
+    baskets: number | null;
+    courseId: number | null;
+    courseName: string | null;
+    parRating: number | null;
+    pointRating: number | null;
 }
 
 export interface RoundPlayerResultData {
@@ -33,32 +36,15 @@ export interface RoundPlayerResultData {
     roundRating: number;
 }
 
-export interface RoundFullData {
-    id: number;
-    name: string;
-    datetime: Date;
-    courseId: number | null;
-    courseName: string | null;
-    parRating: number | null;
-    pointRating: number | null;
-    results: RoundPlayerResultData[];
-}
-
 export interface PlayerRoundData {
     id: number;
     name: string;
     datetime: Date;
+    baskets: number;
     courseId: number;
     courseName: string;
     result: number;
     rating: number;
-}
-
-export interface PlayerFullData {
-    id: number;
-    metrixName: string;
-    rating: number | null;
-    rounds: PlayerRoundData[];
 }
 
 interface PlayerResult {
@@ -205,7 +191,7 @@ export default class RatingService {
             id: row.player_id,
             metrixName: row.metrix_name,
             rating: row.rating
-        } as RatingPlayerData));
+        } as PlayerData));
         return {date: ratingDate, ratings: ratings};
     }
 
@@ -229,7 +215,7 @@ export default class RatingService {
         return ids;
     }
 
-    async getRounds(): Promise<RoundShortData[]> {
+    async getRounds(): Promise<RoundData[]> {
         const roundRows = await this.knex<RoundRow>('rounds')
             .select()
             .where({processed: true})
@@ -238,12 +224,15 @@ export default class RatingService {
             id: row.id,
             name: row.name,
             datetime: row.datetime,
+            baskets: row.baskets,
             courseId: row.course_id,
-            courseName: row.course_name
-        } as RoundShortData));
+            courseName: row.course_name,
+            parRating: row.par_rating,
+            pointRating: row.point_rating
+        } as RoundData));
     }
 
-    async getRound(roundId: number): Promise<RoundFullData> {
+    async getRound(roundId: number): Promise<RoundData> {
         const roundRow = await this.knex<RoundRow>('rounds')
             .first()
             .where({id: roundId})
@@ -251,31 +240,34 @@ export default class RatingService {
         if (!roundRow || !roundRow.name || !roundRow.datetime) {
             throw new RatingError(RatingError.ROUND_NOT_FOUND);
         }
+        return {
+            id: roundRow.id,
+            name: roundRow.name,
+            datetime: roundRow.datetime,
+            baskets: roundRow.baskets,
+            courseId: roundRow.course_id,
+            courseName: roundRow.course_name,
+            parRating: roundRow.par_rating,
+            pointRating: roundRow.point_rating
+        };
+    }
+
+    async getRoundResults(roundId: number): Promise<RoundPlayerResultData[]> {
         const resultRows = await this.knex<ResultJoinedPlayerRow>({r: 'results'})
             .select()
             .leftJoin({p: 'players'}, {'r.player_id': 'p.id'})
             .where({'r.round_id': roundId})
             .orderBy('r.result');
-        const results = resultRows.map(row => ({
+        return resultRows.map(row => ({
             id: row.player_id,
             metrixName: row.metrix_name,
             result: row.result,
             playerRating: row.player_rating,
             roundRating: row.round_rating
         } as RoundPlayerResultData));
-        return {
-            id: roundRow.id,
-            name: roundRow.name,
-            datetime: roundRow.datetime,
-            courseId: roundRow.course_id,
-            courseName: roundRow.course_name,
-            parRating: roundRow.par_rating,
-            pointRating: roundRow.point_rating,
-            results: results
-        };
     }
 
-    async getPlayer(playerId: number): Promise<PlayerFullData> {
+    async getPlayer(playerId: number): Promise<PlayerData> {
         const playerRow = await this.knex<PlayerRow>('players')
             .where({id: playerId})
             .first();
@@ -283,12 +275,16 @@ export default class RatingService {
             throw new RatingError(RatingError.PLAYER_NOT_FOUND);
         }
         const rating = await this.getPlayerRating(this.knex, playerId, new Date(Date.now()));
+        return {id: playerId, metrixName: playerRow.metrix_name, rating: rating};
+    }
+
+    async getPlayerRounds(playerId: number): Promise<PlayerRoundData[]> {
         const resultRows = await this.knex({a: 'results'})
             .select()
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where({'a.player_id': playerId})
             .orderBy('b.datetime', 'desc') as ResultJoinedRoundRow[];
-        const rounds = resultRows.map(row => ({
+        return resultRows.map(row => ({
             id: row.round_id,
             name: row.name,
             datetime: row.datetime,
@@ -297,7 +293,6 @@ export default class RatingService {
             result: row.result,
             rating: row.round_rating
         } as PlayerRoundData));
-        return {id: playerId, metrixName: playerRow.metrix_name, rating: rating, rounds: rounds};
     }
 
     private async getPlayerRating(builder: Knex, playerId: number, date: Date): Promise<number | null> {
