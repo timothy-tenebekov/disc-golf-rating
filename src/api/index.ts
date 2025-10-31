@@ -1,5 +1,6 @@
 import Express from 'express';
 import RatingService from "../services/rating";
+import RatingError from "../services/error";
 
 export default (ratingService: RatingService): Express.Router => {
     const router = new Router(ratingService);
@@ -18,8 +19,8 @@ class Router {
 
         this.router.get('/rating{/:date}', this.rating);
         this.router.get('/rounds', this.rounds);
-        this.router.get('/round{/:id}', this.round);
-        this.router.get('/player{/:id}', this.player);
+        this.router.get('/round/:id', this.round);
+        this.router.get('/player/:id', this.player);
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
@@ -46,6 +47,9 @@ class Router {
 
     private readonly round: RouterCallback = async (req, res) => {
         const roundId = parseInt(req.params['id']);
+        if (isNaN(roundId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
         const round = await this.ratingService.getRound(roundId);
         const results = await this.ratingService.getRoundResults(roundId);
 
@@ -57,6 +61,9 @@ class Router {
 
     private readonly player: RouterCallback = async (req, res) => {
         const playerId = parseInt(req.params['id']);
+        if (isNaN(playerId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
         const player = await this.ratingService.getPlayer(playerId);
         const rounds = await this.ratingService.getPlayerRounds(playerId);
 

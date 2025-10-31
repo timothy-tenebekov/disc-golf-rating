@@ -21,9 +21,9 @@ export interface RoundData {
     id: number;
     name: string | null;
     datetime: Date | null;
-    baskets: number | null;
     courseId: number | null;
     courseName: string | null;
+    baskets: number | null;
     parRating: number | null;
     pointRating: number | null;
 }
@@ -40,9 +40,9 @@ export interface PlayerRoundData {
     id: number;
     name: string;
     datetime: Date;
-    baskets: number;
     courseId: number;
     courseName: string;
+    baskets: number;
     result: number;
     rating: number;
 }
@@ -224,9 +224,9 @@ export default class RatingService {
             id: row.id,
             name: row.name,
             datetime: row.datetime,
-            baskets: row.baskets,
             courseId: row.course_id,
             courseName: row.course_name,
+            baskets: row.baskets,
             parRating: row.par_rating,
             pointRating: row.point_rating
         } as RoundData));
@@ -244,9 +244,9 @@ export default class RatingService {
             id: roundRow.id,
             name: roundRow.name,
             datetime: roundRow.datetime,
-            baskets: roundRow.baskets,
             courseId: roundRow.course_id,
             courseName: roundRow.course_name,
+            baskets: roundRow.baskets,
             parRating: roundRow.par_rating,
             pointRating: roundRow.point_rating
         };
@@ -290,6 +290,7 @@ export default class RatingService {
             datetime: row.datetime,
             courseId: row.course_id,
             courseName: row.course_name,
+            baskets: row.baskets,
             result: row.result,
             rating: row.round_rating
         } as PlayerRoundData));

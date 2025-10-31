@@ -10,9 +10,13 @@ block center-panel
             th(class="col-center") Название
             th(class="col-center") Дата
             th(class="col-center") Трасса
+            th(class="col-center") Корзины
+            th(class="col-center") Рейтинг<br>пара
         each val in rounds
             tr
                 td(class="col-left")
                     a(href= '/round/' + val.id)= val.name
                 td(class="col-center")= val.datetime.toLocaleString()
                 td(class="col-left")= val.courseName
+                td(class="col-center")= val.baskets
+                td(class="col-center")= val.parRating

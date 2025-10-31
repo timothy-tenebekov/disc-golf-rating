@@ -5,14 +5,15 @@ block head
 
 block center-panel
     h2= 'Игрок: ' + player.metrixName
-    h3= 'Текущий рейтинг: ' + player.rating
-    h3
+    h4= 'Текущий рейтинг: ' + player.rating
+    h4
         a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
     table
         tr
             th(class="col-center") Раунд
             th(class="col-center") Дата
             th(class="col-center") Трасса
+            th(class="col-center") Корзины
             th(class="col-center") Результат
             th(class="col-center") Рейтинг<br>за раунд
         each val in rounds
@@ -21,5 +22,6 @@ block center-panel
                     a(href= '/round/' + val.id)= val.name
                 td(class="col-center")= val.datetime.toLocaleString()
                 td(class="col-left")= val.courseName
+                td(class="col-center")= val.baskets
                 td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
                 td(class="col-center")= val.rating
