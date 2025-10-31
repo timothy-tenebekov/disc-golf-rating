@@ -8,6 +8,8 @@ block center-panel
     if round.courseName
         h3= 'Трасса: ' + round.courseName
     h3= 'Дата: ' + round.datetime.toLocaleString()
+    if round.parRating > 0
+        h3= 'Рейтинг пара: ' + round.parRating + ', очка: ' + round.pointRating
     h3
         a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
     table
@@ -28,48 +30,49 @@ block center-panel
         canvas#chart
 
 block script
-    script(src='https://cdn.jsdelivr.net/npm/chart.js')
-    script.
-        const data = !{JSON.stringify(round)};
-        const ctx = document.getElementById('chart').getContext('2d');
-        const results = data.results.filter(item => item.playerRating > 0);
-        const minResult = Math.min(results.at(0).result, 0);
-        const maxResult = results.at(-1).result;
-        const minRating = data.parRating - data.pointRating * minResult;
-        const maxRating = data.parRating - data.pointRating * maxResult;
-        new Chart(ctx, {
-            data: {
-                labels: results.map(item => item.metrixName),
-                datasets: [
-                    {
-                        type: "scatter",
-                        label: 'Results',
-                        data: results.map(item => ({
-                            x: item.result,
-                            y: item.playerRating
-                        }))
-                    },
-                    {
-                        type: "line",
-                        label: "Rating",
-                        data: [[minResult, minRating], [maxResult, maxRating]]
-                    }
-                ],
-            },
-            options: {
-                responsive: false,
-                scales: {
-                    x: {
-                        reverse: true,
-                        min: minResult,
-                        max: maxResult,
-                        offset: true
-                    }
+    if round.parRating > 0
+        script(src='https://cdn.jsdelivr.net/npm/chart.js')
+        script.
+            const data = !{JSON.stringify(round)};
+            const ctx = document.getElementById('chart').getContext('2d');
+            const results = data.results.filter(item => item.playerRating > 0);
+            const minResult = results.at(0).result;
+            const maxResult = results.at(-1).result;
+            const minRating = data.parRating - data.pointRating * minResult;
+            const maxRating = data.parRating - data.pointRating * maxResult;
+            new Chart(ctx, {
+                data: {
+                    labels: results.map(item => item.metrixName),
+                    datasets: [
+                        {
+                            type: "scatter",
+                            label: 'Результат',
+                            data: results.map(item => ({
+                                x: item.result,
+                                y: item.playerRating
+                            }))
+                        },
+                        {
+                            type: "line",
+                            label: "Рейтинг",
+                            data: [[minResult, minRating], [maxResult, maxRating]]
+                        }
+                    ],
                 },
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+                options: {
+                    responsive: false,
+                    scales: {
+                        x: {
+                            reverse: true,
+                            min: minResult,
+                            max: maxResult,
+                            offset: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
+            });

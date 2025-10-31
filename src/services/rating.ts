@@ -39,8 +39,8 @@ export interface RoundFullData {
     datetime: Date;
     courseId: number | null;
     courseName: string | null;
-    parRating: number;
-    pointRating: number;
+    parRating: number | null;
+    pointRating: number | null;
     results: RoundPlayerResultData[];
 }
 
@@ -248,7 +248,7 @@ export default class RatingService {
             .first()
             .where({id: roundId})
             .andWhere({processed: true});
-        if (!roundRow || !roundRow.name || !roundRow.datetime || !roundRow.par_rating || !roundRow.point_rating) {
+        if (!roundRow || !roundRow.name || !roundRow.datetime) {
             throw new RatingError(RatingError.ROUND_NOT_FOUND);
         }
         const resultRows = await this.knex<ResultJoinedPlayerRow>({r: 'results'})

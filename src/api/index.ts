@@ -1,4 +1,5 @@
 import Express from 'express';
+import logger from '../loaders/logger';
 import RatingService from "../services/rating";
 
 export default (ratingService: RatingService): Express.Router => {
@@ -23,7 +24,7 @@ class Router {
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
-        //Router.logRequest(req);
+        Router.logRequest(req);
         try {
             const dateStr = req.params['date'];
             const date = new Date(dateStr ? Date.parse(dateStr) : Date.now());
@@ -37,13 +38,13 @@ class Router {
                 dates: formattedDates
             });
         } catch (e) {
-            //Router.logError(e);
+            Router.logError(e);
             res.status(500);
         }
     };
 
     private readonly rounds: RouterCallback = async (req, res) => {
-        //Router.logRequest(req);
+        Router.logRequest(req);
         try {
             const rounds = await this.ratingService.getRounds();
 
@@ -51,13 +52,13 @@ class Router {
                 rounds: rounds
             });
         } catch (e) {
-            //Router.logError(e);
+            Router.logError(e);
             res.status(500);
         }
     };
 
     private readonly round: RouterCallback = async (req, res) => {
-        //Router.logRequest(req);
+        Router.logRequest(req);
         try {
             const roundId = parseInt(req.params['id']);
             const round = await this.ratingService.getRound(roundId);
@@ -66,13 +67,13 @@ class Router {
                 round: round
             });
         } catch (e) {
-            //Router.logError(e);
+            Router.logError(e);
             res.status(500);
         }
     };
 
     private readonly player: RouterCallback = async (req, res) => {
-        //Router.logRequest(req);
+        Router.logRequest(req);
         try {
             const playerId = parseInt(req.params['id']);
             const player = await this.ratingService.getPlayer(playerId);
@@ -81,10 +82,18 @@ class Router {
                 player: player
             });
         } catch (e) {
-            //Router.logError(e);
+            Router.logError(e);
             res.status(500);
         }
     };
+
+    private static logRequest(req: Express.Request): void {
+        logger.info('Calling %s endpoint with body %o', req.originalUrl, req.body);
+    }
+
+    private static logError(e: unknown): void {
+        logger.info('Error: %o', e);
+    }
 
     private static formatDate(date: Date): string {
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
