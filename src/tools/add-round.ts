@@ -22,7 +22,7 @@ async function main() {
         const roundResult = await metrixService.getRoundResult(roundId);
         console.info(`Round: ${roundResult.name} ${roundResult.datetime.toISOString()}`);
 
-        await ratingService.addRound(roundId);
+        await ratingService.addRound(roundId, roundResult);
         console.info(`Round added`);
     }
     finally {

@@ -73,10 +73,14 @@ export default class RatingService {
         return settingRow.value;
     }
 
-    async addRound(roundId: number): Promise<void> {
+    async addRound(roundId: number, roundResult: MetrixRoundResult): Promise<void> {
         try {
             await this.knex<RoundRow>('rounds')
-                .insert({id: roundId})
+                .insert({
+                    id: roundId,
+                    name: roundResult.name,
+                    datetime: roundResult.datetime
+                });
         } catch (err) {
             throw new RatingError(RatingError.ROUND_ALREADY_EXISTS);
         }
@@ -215,10 +219,10 @@ export default class RatingService {
         return ids;
     }
 
-    async getRounds(): Promise<RoundData[]> {
+    async getRounds(all: boolean = false): Promise<RoundData[]> {
         const roundRows = await this.knex<RoundRow>('rounds')
             .select()
-            .where({processed: true})
+            .where(all ? {} : {processed: true})
             .orderBy('datetime', 'desc');
         return roundRows.map(row => ({
             id: row.id,

@@ -16,8 +16,8 @@ CREATE TABLE players (
 
 CREATE TABLE rounds (
     id           INTEGER NOT NULL,
-    name         VARCHAR,
-    datetime     TIMESTAMPTZ,
+    name         VARCHAR NOT NULL,
+    datetime     TIMESTAMPTZ NOT NULL,
     course_id    INTEGER,
     course_name  VARCHAR,
     baskets      INTEGER,

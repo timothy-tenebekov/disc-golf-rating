@@ -5,8 +5,9 @@ import morgan from 'morgan';
 import api from '../api';
 import logger, {LoggerStream} from './logger';
 import RatingService from "../services/rating";
+import MetrixService from "../services/metrix";
 
-export default (app: Application, ratingService: RatingService): void => {
+export default (app: Application, ratingService: RatingService, metrixService: MetrixService): void => {
     app.set('trust proxy', true);
     app.set('views', './views');
     app.set('view engine', 'pug');
@@ -17,7 +18,7 @@ export default (app: Application, ratingService: RatingService): void => {
     app.use(morgan('short', {stream: new LoggerStream()}));
 
     app.use(express.static('public'));
-    app.use('/', api(ratingService));
+    app.use('/', api(ratingService, metrixService));
 
     app.use(errorHandler);
 }

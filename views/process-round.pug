@@ -1,0 +1,22 @@
+html
+    head
+        title Расчет раунда
+        link(rel='stylesheet', href='/styles.css')
+body
+    div(class="container")
+        div(class="panel center-panel")
+            h2 Расчет раунда
+            form#roundForm
+                select#round(name="round")
+                    each val in rounds
+                        option(value=val.id)= val.datetime ? (val.datetime.toLocaleString() + ' - ' + val.name) : val.id
+                button(type="submit") Рассчитать
+
+script.
+    document.getElementById('roundForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const roundId = document.getElementById('round').value;
+        if (roundId) {
+            window.location.href = '/admin/process-round/' + roundId;
+        }
+    });

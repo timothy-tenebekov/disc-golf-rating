@@ -1,9 +1,10 @@
 import Express from 'express';
 import RatingService from "../services/rating";
 import RatingError from "../services/error";
+import MetrixService from "../services/metrix";
 
-export default (ratingService: RatingService): Express.Router => {
-    const router = new Router(ratingService);
+export default (ratingService: RatingService, metrixService: MetrixService): Express.Router => {
+    const router = new Router(ratingService, metrixService);
     return router.router;
 }
 
@@ -12,15 +13,19 @@ type RouterCallback = (req: Express.Request, res: Express.Response) => void;
 class Router {
     readonly router: Express.Router;
     readonly ratingService: RatingService;
+    readonly metrixService: MetrixService;
 
-    constructor(ratingService: RatingService) {
+    constructor(ratingService: RatingService, metrixService: MetrixService) {
         this.router = Express.Router({mergeParams: true});
         this.ratingService = ratingService;
+        this.metrixService = metrixService;
 
         this.router.get('/rating{/:date}', this.rating);
         this.router.get('/rounds', this.rounds);
         this.router.get('/round/:id', this.round);
         this.router.get('/player/:id', this.player);
+
+        this.router.get('/admin/process-round{/:id}', this.adminProcessRound);
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
@@ -71,6 +76,26 @@ class Router {
             player: player,
             rounds: rounds
         });
+    };
+
+    private readonly adminProcessRound: RouterCallback = async (req, res) => {
+        const roundIdStr = req.params['id'];
+        if (roundIdStr) {
+            const roundId = parseInt(roundIdStr);
+            if (isNaN(roundId)) {
+                throw new RatingError(RatingError.INVALID_PARAMS);
+            }
+
+            const roundResult = await this.metrixService.getRoundResult(roundId);
+            await this.ratingService.processRound(roundId, roundResult, true);
+
+            res.redirect('/round/' + roundId);
+        } else {
+            const rounds = await this.ratingService.getRounds(true);
+            res.render('process-round', {
+                rounds: rounds
+            });
+        }
     };
 
     private static formatDate(date: Date): string {
