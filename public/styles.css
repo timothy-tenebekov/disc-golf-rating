@@ -74,8 +74,9 @@ label, select, button {
 .panel {
     width: fit-content;
     max-width: 1200px;
+    min-height: 60px;
     margin: auto;
-    padding: 10px 20px;
+    padding: 0 0;
     box-sizing: border-box;
     text-align: center;
     overflow: auto;
@@ -86,7 +87,7 @@ label, select, button {
 }
 
 .center-panel {
-    padding: 10px 40px;
+    padding: 5px 30px;
     #background-color: #f0f0f0;
 }
 
