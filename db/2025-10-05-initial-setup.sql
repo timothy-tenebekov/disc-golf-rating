@@ -23,7 +23,7 @@ CREATE TABLE rounds (
     baskets      INTEGER,
     par_rating   INTEGER,
     point_rating REAL,
-    processed    BOOLEAN,
+    processed    BOOLEAN NOT NULL,
     PRIMARY KEY (id)
 );
 

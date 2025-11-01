@@ -25,7 +25,10 @@ class Router {
         this.router.get('/round/:id', this.round);
         this.router.get('/player/:id', this.player);
 
-        this.router.get('/admin/process-round{/:id}', this.adminProcessRound);
+        this.router.get('/admin/rounds', this.adminRounds);
+        this.router.get('/admin/round/add/:id', this.adminRoundAdd);
+        this.router.get('/admin/round/remove/:id', this.adminRoundRemove);
+        this.router.get('/admin/round/process/:id', this.adminRoundProcess);
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
@@ -78,24 +81,47 @@ class Router {
         });
     };
 
-    private readonly adminProcessRound: RouterCallback = async (req, res) => {
-        const roundIdStr = req.params['id'];
-        if (roundIdStr) {
-            const roundId = parseInt(roundIdStr);
-            if (isNaN(roundId)) {
-                throw new RatingError(RatingError.INVALID_PARAMS);
-            }
+    private readonly adminRounds: RouterCallback = async (req, res) => {
+        const rounds = await this.ratingService.getRounds(true);
 
-            const roundResult = await this.metrixService.getRoundResult(roundId);
-            await this.ratingService.processRound(roundId, roundResult, true);
+        res.render('admin-rounds', {
+            rounds: rounds
+        });
+    };
 
-            res.redirect('/round/' + roundId);
-        } else {
-            const rounds = await this.ratingService.getRounds(true);
-            res.render('process-round', {
-                rounds: rounds
-            });
+    private readonly adminRoundAdd: RouterCallback = async (req, res) => {
+        const roundId = parseInt(req.params['id']);
+        if (isNaN(roundId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
         }
+
+        const roundResult = await this.metrixService.getRoundResult(roundId);
+        await this.ratingService.addRound(roundId, roundResult);
+
+        res.redirect('/admin/rounds');
+    };
+
+    private readonly adminRoundRemove: RouterCallback = async (req, res) => {
+        const roundId = parseInt(req.params['id']);
+        if (isNaN(roundId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
+
+        await this.ratingService.removeRound(roundId, false);
+
+        res.redirect('/admin/rounds');
+    };
+
+    private readonly adminRoundProcess: RouterCallback = async (req, res) => {
+        const roundId = parseInt(req.params['id']);
+        if (isNaN(roundId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
+
+        const roundResult = await this.metrixService.getRoundResult(roundId);
+        await this.ratingService.processRound(roundId, roundResult, true);
+
+        res.redirect('/admin/rounds');
     };
 
     private static formatDate(date: Date): string {

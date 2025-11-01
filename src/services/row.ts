@@ -21,7 +21,7 @@ export interface RoundRow {
     course_name: string | null;
     par_rating: number | null;
     point_rating: number | null;
-    processed: boolean | null;
+    processed: boolean;
 }
 
 export interface ResultRow {

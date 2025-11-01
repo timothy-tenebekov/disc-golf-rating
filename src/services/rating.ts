@@ -26,6 +26,7 @@ export interface RoundData {
     baskets: number | null;
     parRating: number | null;
     pointRating: number | null;
+    processed: boolean;
 }
 
 export interface RoundPlayerResultData {
@@ -79,7 +80,8 @@ export default class RatingService {
                 .insert({
                     id: roundId,
                     name: roundResult.name,
-                    datetime: roundResult.datetime
+                    datetime: roundResult.datetime,
+                    processed: false
                 });
         } catch (err) {
             throw new RatingError(RatingError.ROUND_ALREADY_EXISTS);
@@ -232,7 +234,8 @@ export default class RatingService {
             courseName: row.course_name,
             baskets: row.baskets,
             parRating: row.par_rating,
-            pointRating: row.point_rating
+            pointRating: row.point_rating,
+            processed: row.processed
         } as RoundData));
     }
 
@@ -252,7 +255,8 @@ export default class RatingService {
             courseName: roundRow.course_name,
             baskets: roundRow.baskets,
             parRating: roundRow.par_rating,
-            pointRating: roundRow.point_rating
+            pointRating: roundRow.point_rating,
+            processed: roundRow.processed
         };
     }
 
