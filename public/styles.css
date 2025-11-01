@@ -53,6 +53,10 @@ th, td {
     text-align: center;
 }
 
+.col-grey {
+    background-color: #e0e0e0;
+}
+
 label, select, button {
     padding: 0 0.5rem;
 }

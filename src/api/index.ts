@@ -74,10 +74,12 @@ class Router {
         }
         const player = await this.ratingService.getPlayer(playerId);
         const rounds = await this.ratingService.getPlayerRounds(playerId);
+        const maxBaskets = await this.ratingService.getSetting("MaxBaskets", new Date());
 
         res.render('player', {
             player: player,
-            rounds: rounds
+            rounds: rounds,
+            maxBaskets: maxBaskets
         });
     };
 

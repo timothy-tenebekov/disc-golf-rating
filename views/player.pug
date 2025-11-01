@@ -5,7 +5,7 @@ block head
 
 block center-panel
     h2= 'Игрок: ' + player.metrixName
-    h4= 'Текущий рейтинг: ' + player.rating
+    h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
     h4
         a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
     table
@@ -16,12 +16,15 @@ block center-panel
             th(class="col-center") Корзины
             th(class="col-center") Результат
             th(class="col-center") Рейтинг<br>за раунд
+        - var baskets = 0
         each val in rounds
+            - var extraClass = baskets >= maxBaskets ? " col-grey" : ""
             tr
-                td(class="col-left")
+                td(class="col-left" + extraClass)
                     a(href= '/round/' + val.id)= val.name
-                td(class="col-center")= val.datetime.toLocaleString()
-                td(class="col-left")= val.courseName
-                td(class="col-center")= val.baskets
-                td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
-                td(class="col-center")= val.rating
+                td(class="col-center" + extraClass)= val.datetime.toLocaleString()
+                td(class="col-left" + extraClass)= val.courseName
+                td(class="col-center" + extraClass)= val.baskets
+                td(class="col-center" + extraClass)= (val.result > 0 ? "+" : "") + val.result
+                td(class="col-center" + extraClass)= val.rating
+            - if (val.rating) baskets += val.baskets
