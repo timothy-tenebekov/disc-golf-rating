@@ -1,13 +1,17 @@
-extends base.pug
+extends base-main.pug
 
 block head
     title Рейтинг
 
 block center-panel
     if date
-        h2= 'Рейтинг на ' + date
+        form#dateForm
+            label(for="date") Рейтинг на
+            select#date(name="date" onchange="window.location = '/rating/' + this.value")
+                each val in dates
+                    option(value=val selected=(val === date))= val
     else
-        p Рейтинг не найден
+        h4 Рейтинг не найден
     if ratings
         table
             tr
@@ -18,9 +22,3 @@ block center-panel
                     td(class="col-left")
                         a(href= '/player/' + val.id)= val.metrixName
                     td(class="col-center")= val.rating
-
-block right-panel
-    h3 Даты
-    each date in dates
-        a(href= '/rating/' + date)= date
-        br
