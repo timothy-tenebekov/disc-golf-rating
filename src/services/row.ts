@@ -15,7 +15,8 @@ export interface PlayerRow {
 export interface RoundRow {
     id: number;
     name: string;
-    datetime: Date;
+    date: Date;
+    time: string;
     baskets: number | null;
     course_id: number | null;
     course_name: string | null;
@@ -33,7 +34,7 @@ export interface ResultRow {
 }
 
 export interface ResultJoinedRoundRow extends ResultRow {
-    datetime: Date | null;
+    date: Date | null;
     baskets: number | null;
     name: string | null;
     course_id: number | null;

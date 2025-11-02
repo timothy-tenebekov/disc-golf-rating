@@ -1,5 +1,6 @@
 import {Knex} from 'knex';
 import knexLoader from '../loaders/knex';
+import MetrixService from "../services/metrix";
 import RatingService from "../services/rating";
 
 async function main() {
@@ -7,6 +8,7 @@ async function main() {
     try {
         knex = knexLoader();
         const ratingService = new RatingService(knex);
+        const metrixService = new MetrixService();
 
         const args = process.argv.slice(2);
         if (args.length !== 1 && args.length !== 2) {
@@ -14,12 +16,16 @@ async function main() {
         }
         const roundId = parseInt(args[0]);
         const force = args.length >= 2 && parseInt(args[1]) != 0;
-        if (!roundId) {
-            throw usage();
-        }
 
-        await ratingService.removeRound(roundId, force);
-        console.info(`Round removed`);
+        const roundIds: number[] = roundId != 0 ? [roundId] : await ratingService.getRoundIdsForProcess(force);
+
+        for (const roundId of roundIds) {
+            const roundResult = await metrixService.getRoundResult(roundId);
+            console.info(`Round: ${roundResult.name} ${roundResult.date.toLocaleDateString()} ${roundResult.time}`);
+
+            await ratingService.processRound(roundId, roundResult, force);
+            console.info(`Round processed`);
+        }
     }
     finally {
         if (knex) {
@@ -29,7 +35,7 @@ async function main() {
 }
 
 function usage() {
-    return 'Invalid params. Usage: node remove-round.js roundId [force]';
+    return 'Invalid params. Usage: node round-process.js roundId [force]';
 }
 
 main()

@@ -11,21 +11,19 @@ async function main() {
         const metrixService = new MetrixService();
 
         const args = process.argv.slice(2);
-        if (args.length !== 1 && args.length !== 2) {
+        if (args.length !== 1) {
             throw usage();
         }
         const roundId = parseInt(args[0]);
-        const force = args.length >= 2 && parseInt(args[1]) != 0;
-
-        const roundIds: number[] = roundId != 0 ? [roundId] : await ratingService.getRoundIdsForProcess(force);
-
-        for (const roundId of roundIds) {
-            const roundResult = await metrixService.getRoundResult(roundId);
-            console.info(`Round: ${roundResult.name} ${roundResult.datetime.toISOString()}`);
-
-            await ratingService.processRound(roundId, roundResult, force);
-            console.info(`Round processed`);
+        if (!roundId) {
+            throw usage();
         }
+
+        const roundResult = await metrixService.getRoundResult(roundId);
+        console.info(`Round: ${roundResult.name} ${roundResult.date.toLocaleDateString()} ${roundResult.time}`);
+
+        await ratingService.addRound(roundId, roundResult);
+        console.info(`Round added`);
     }
     finally {
         if (knex) {
@@ -35,7 +33,7 @@ async function main() {
 }
 
 function usage() {
-    return 'Invalid params. Usage: node process-round.js roundId [force]';
+    return 'Invalid params. Usage: node round-add.js roundId';
 }
 
 main()

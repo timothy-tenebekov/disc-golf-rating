@@ -36,12 +36,11 @@ class Router {
         const date = new Date(dateStr ? Date.parse(dateStr) : Date.now());
         const ratingsData = await this.ratingService.getRatings(date);
         const dates = await this.ratingService.getRatingDates();
-        const formattedDates = dates.map(date => Router.formatDate(date));
 
         res.render('rating', {
             date: ratingsData ? Router.formatDate(ratingsData.date) : null,
             ratings: ratingsData ? ratingsData.ratings : null,
-            dates: formattedDates
+            dates: dates.map(value => ({original: value, formatted: Router.formatDate(value)}))
         });
     };
 

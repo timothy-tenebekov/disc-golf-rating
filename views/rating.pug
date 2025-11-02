@@ -9,7 +9,7 @@ block center-panel
             label(for="date") Рейтинг на
             select#date(name="date" onchange="window.location = '/rating/' + this.value")
                 each val in dates
-                    option(value=val selected=(val === date))= val
+                    option(value=val.formatted selected=(val.formatted === date))= val.original.toLocaleDateString()
     else
         h4 Рейтинг не найден
     if ratings

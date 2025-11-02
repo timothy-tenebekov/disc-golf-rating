@@ -19,8 +19,8 @@ export interface RatingsData {
 
 export interface RoundData {
     id: number;
-    name: string | null;
-    datetime: Date | null;
+    name: string;
+    date: Date;
     courseId: number | null;
     courseName: string | null;
     baskets: number | null;
@@ -40,7 +40,7 @@ export interface RoundPlayerResultData {
 export interface PlayerRoundData {
     id: number;
     name: string;
-    datetime: Date;
+    date: Date;
     courseId: number;
     courseName: string;
     baskets: number;
@@ -80,7 +80,8 @@ export default class RatingService {
                 .insert({
                     id: roundId,
                     name: roundResult.name,
-                    datetime: roundResult.datetime,
+                    date: roundResult.date,
+                    time: roundResult.time,
                     processed: false
                 });
         } catch (err) {
@@ -103,7 +104,8 @@ export default class RatingService {
             await trx<RoundRow>('rounds')
                 .update({
                     name: roundResult.name,
-                    datetime: roundResult.datetime,
+                    date: roundResult.date,
+                    time: roundResult.time,
                     course_id: roundResult.courseId,
                     course_name: roundResult.courseName,
                     baskets: roundResult.baskets,
@@ -131,8 +133,7 @@ export default class RatingService {
 
             await this.calculateRating(trx, roundId);
 
-            const date = RatingService.truncateTime(roundResult.datetime);
-            const futureRoundsIds = await this.getFutureRounds(trx, date);
+            const futureRoundsIds = await this.getFutureRounds(trx, roundResult.date);
 
             for (const futureRoundId of futureRoundsIds) {
                 await this.calculateRating(trx, futureRoundId);
@@ -161,17 +162,11 @@ export default class RatingService {
                 return;
             }
 
-            if (!roundRow.datetime) {
-                throw new RatingError(RatingError.UNKNOWN);
-            }
-
-            const date = RatingService.truncateTime(roundRow.datetime);
-
             await trx<ResultRow>('results')
                 .delete()
                 .where({round_id: roundId});
 
-            const futureRoundsIds = await this.getFutureRounds(trx, date);
+            const futureRoundsIds = await this.getFutureRounds(trx, roundRow.date);
 
             for (const futureRoundId of futureRoundsIds) {
                 await this.calculateRating(trx, futureRoundId);
@@ -211,7 +206,7 @@ export default class RatingService {
     async getRoundIdsForProcess(force: boolean): Promise<number[]> {
         const roundRows = await this.knex<RoundRow>('rounds')
             .select()
-            .orderBy('datetime', 'asc');
+            .orderBy('date', 'asc');
         const ids: number[] = [];
         for (const roundRow of roundRows) {
             if (!roundRow.processed || force) {
@@ -225,11 +220,11 @@ export default class RatingService {
         const roundRows = await this.knex<RoundRow>('rounds')
             .select()
             .where(all ? {} : {processed: true})
-            .orderBy('datetime', 'desc');
+            .orderBy([{column: 'date', order: 'desc'}, {column: 'time', order: 'desc'}]);
         return roundRows.map(row => ({
             id: row.id,
             name: row.name,
-            datetime: row.datetime,
+            date: row.date,
             courseId: row.course_id,
             courseName: row.course_name,
             baskets: row.baskets,
@@ -244,13 +239,13 @@ export default class RatingService {
             .first()
             .where({id: roundId})
             .andWhere({processed: true});
-        if (!roundRow || !roundRow.name || !roundRow.datetime) {
+        if (!roundRow || !roundRow.processed) {
             throw new RatingError(RatingError.ROUND_NOT_FOUND);
         }
         return {
             id: roundRow.id,
             name: roundRow.name,
-            datetime: roundRow.datetime,
+            date: roundRow.date,
             courseId: roundRow.course_id,
             courseName: roundRow.course_name,
             baskets: roundRow.baskets,
@@ -291,11 +286,11 @@ export default class RatingService {
             .select()
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where({'a.player_id': playerId})
-            .orderBy('b.datetime', 'desc') as ResultJoinedRoundRow[];
+            .orderBy([{column: 'b.date', order: 'desc'}, {column: 'b.time', order: 'desc'}]) as ResultJoinedRoundRow[];
         return resultRows.map(row => ({
             id: row.round_id,
             name: row.name,
-            datetime: row.datetime,
+            date: row.date,
             courseId: row.course_id,
             courseName: row.course_name,
             baskets: row.baskets,
@@ -323,7 +318,8 @@ export default class RatingService {
     private async getFutureRounds(builder: Knex, date: Date): Promise<number[]> {
         const roundRows = await builder<RoundRow>('rounds')
             .select()
-            .where('datetime', '>', date);
+            .where('date', '>', date)
+            .where({processed: true});
         return roundRows.map(row => row.id);
     }
 
@@ -335,10 +331,10 @@ export default class RatingService {
             .select()
             .where({round_id: roundId});
 
-        if (!roundRow || roundRow.datetime == undefined || roundRow.baskets == undefined) {
+        if (!roundRow || roundRow.baskets == undefined) {
             throw new RatingError(RatingError.UNKNOWN);
         }
-        const date = RatingService.truncateTime(roundRow.datetime);
+        const date = roundRow.date;
         const minPointRating = await this.getSetting("MinBirdieDiff", date) / roundRow.baskets;
 
         const results: PlayerResult[] = [];
@@ -376,11 +372,11 @@ export default class RatingService {
         const maxDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
         const resultRows = await builder({a: 'results'})
-            .select('a.*', 'b.datetime', 'b.baskets')
+            .select('a.*', 'b.date', 'b.baskets')
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
-            .where('b.datetime', '>', minDate)
-            .andWhere('b.datetime', '<', maxDate)
-            .orderBy([{column: 'a.player_id'}, {column: 'b.datetime', order: 'desc'}]) as ResultJoinedRoundRow[];
+            .where('b.date', '>', minDate)
+            .andWhere('b.date', '<', maxDate)
+            .orderBy([{column: 'a.player_id'}, {column: 'b.date', order: 'desc'}]) as ResultJoinedRoundRow[];
         const ratings: Map<number, number> = new Map();
         let playerId = 0;
         let sum = 0;
@@ -449,9 +445,5 @@ export default class RatingService {
         }
 
         return [a, b];
-    }
-
-    private static truncateTime(datetime: Date): Date {
-        return new Date(datetime.getFullYear(), datetime.getMonth(), datetime.getDate());
     }
 }

@@ -11,7 +11,8 @@ export interface MetrixPlayerResult {
 
 export interface MetrixRoundResult {
     name: string;
-    datetime: Date;
+    date: Date;
+    time: string;
     courseId: number;
     courseName: string;
     baskets: number;
@@ -67,7 +68,8 @@ export default class MetrixService {
 
         return {
             name: MetrixService.decodeHtml(competition.Name),
-            datetime: new Date(competition.Date + ' ' + competition.Time),
+            date: new Date(competition.Date),
+            time: competition.Time,
             courseId: competition.CourseID,
             courseName: MetrixService.decodeHtml(competition.CourseName),
             baskets: competition.Tracks.length,

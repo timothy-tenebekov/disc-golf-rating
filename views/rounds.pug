@@ -16,7 +16,7 @@ block center-panel
             tr
                 td(class="col-left")
                     a(href= '/round/' + val.id)= val.name
-                td(class="col-center")= val.datetime.toLocaleString()
+                td(class="col-center")= val.date.toLocaleDateString()
                 td(class="col-left")= val.courseName
                 td(class="col-center")= val.baskets
                 td(class="col-center")= val.parRating
