@@ -14,7 +14,7 @@ block center-panel
             th(class="col-center") Дата
             th(class="col-center") Обработан
             th(class="col-center") Обработка
-            th(class="col-center") Удалить
+            th(class="col-center") Отмена
         each val in rounds
             tr
                 td(class="col-left")
@@ -24,7 +24,10 @@ block center-panel
                 td(class="col-center")
                     a(href= 'round/process/' + val.id)= val.processed ? 'Переобработка' : 'Обработка'
                 td(class="col-center")
-                    a(href= 'round/remove/' + val.id) Удалить
+                    if (val.processed)
+                        a(href= 'round/cancel/' + val.id) Отмена
+                    else
+                        a(href= 'round/remove/' + val.id) Удаление
 
 block script
     script.

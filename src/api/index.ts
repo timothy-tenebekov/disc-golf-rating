@@ -29,6 +29,7 @@ class Router {
         this.router.get('/admin/round/add/:id', this.adminRoundAdd);
         this.router.get('/admin/round/remove/:id', this.adminRoundRemove);
         this.router.get('/admin/round/process/:id', this.adminRoundProcess);
+        this.router.get('/admin/round/cancel/:id', this.adminRoundCancel);
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
@@ -108,7 +109,7 @@ class Router {
             throw new RatingError(RatingError.INVALID_PARAMS);
         }
 
-        await this.ratingService.removeRound(roundId, false);
+        await this.ratingService.removeRound(roundId);
 
         res.redirect('/admin/rounds');
     };
@@ -121,6 +122,17 @@ class Router {
 
         const roundResult = await this.metrixService.getRoundResult(roundId);
         await this.ratingService.processRound(roundId, roundResult, true);
+
+        res.redirect('/admin/rounds');
+    };
+
+    private readonly adminRoundCancel: RouterCallback = async (req, res) => {
+        const roundId = parseInt(req.params['id']);
+        if (isNaN(roundId)) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
+
+        await this.ratingService.cancelRound(roundId);
 
         res.redirect('/admin/rounds');
     };

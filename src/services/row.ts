@@ -14,6 +14,7 @@ export interface PlayerRow {
 
 export interface RoundRow {
     id: number;
+    processed: boolean;
     name: string;
     date: Date;
     time: string;
@@ -22,7 +23,6 @@ export interface RoundRow {
     course_name: string | null;
     par_rating: number | null;
     point_rating: number | null;
-    processed: boolean;
 }
 
 export interface ResultRow {

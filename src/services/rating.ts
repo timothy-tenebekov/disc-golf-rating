@@ -79,14 +79,33 @@ export default class RatingService {
             await this.knex<RoundRow>('rounds')
                 .insert({
                     id: roundId,
+                    processed: false,
                     name: roundResult.name,
                     date: roundResult.date,
-                    time: roundResult.time,
-                    processed: false
+                    time: roundResult.time
                 });
         } catch (err) {
             throw new RatingError(RatingError.ROUND_ALREADY_EXISTS);
         }
+    }
+
+    async removeRound(roundId: number): Promise<void> {
+        return this.knex.transaction(async trx => {
+            const roundRow = await this.knex<RoundRow>('rounds')
+                .first()
+                .where({id: roundId});
+            if (!roundRow) {
+                throw new RatingError(RatingError.ROUND_NOT_FOUND);
+            }
+
+            if (roundRow.processed) {
+                throw new RatingError(RatingError.ROUND_ALREADY_PROCESSED);
+            }
+
+            await trx<RoundRow>('rounds')
+                .delete()
+                .where({id: roundId});
+        });
     }
 
     async processRound(roundId: number, roundResult: MetrixRoundResult, force: boolean): Promise<void> {
@@ -103,6 +122,7 @@ export default class RatingService {
 
             await trx<RoundRow>('rounds')
                 .update({
+                    processed: true,
                     name: roundResult.name,
                     date: roundResult.date,
                     time: roundResult.time,
@@ -110,14 +130,15 @@ export default class RatingService {
                     course_name: roundResult.courseName,
                     baskets: roundResult.baskets,
                     par_rating: undefined,
-                    point_rating: undefined,
-                    processed: true
+                    point_rating: undefined
                 })
                 .where({id: roundId});
 
-            await trx<ResultRow>('results')
-                .delete()
-                .where({round_id: roundId});
+            if (roundRow.processed) {
+                await trx<ResultRow>('results')
+                    .delete()
+                    .where({round_id: roundId});
+            }
 
             for (const playerResult of roundResult.playerResults) {
                 if (playerResult.id == null || playerResult.className === 'Тренировка' || playerResult.dnf) {
@@ -141,7 +162,7 @@ export default class RatingService {
         });
     }
 
-    async removeRound(roundId: number, force: boolean): Promise<void> {
+    async cancelRound(roundId: number): Promise<void> {
         return this.knex.transaction(async trx => {
             const roundRow = await this.knex<RoundRow>('rounds')
                 .first()
@@ -150,21 +171,26 @@ export default class RatingService {
                 throw new RatingError(RatingError.ROUND_NOT_FOUND);
             }
 
-            if (roundRow.processed && !force) {
-                throw new RatingError(RatingError.ROUND_ALREADY_PROCESSED);
+            if (!roundRow.processed) {
+                throw new RatingError(RatingError.ROUND_NOT_PROCESSED);
             }
 
             await trx<RoundRow>('rounds')
-                .delete()
+                .update({
+                    processed: false,
+                    course_id: undefined,
+                    course_name: undefined,
+                    baskets: undefined,
+                    par_rating: undefined,
+                    point_rating: undefined
+                })
                 .where({id: roundId});
-
-            if (!roundRow.processed) {
-                return;
-            }
 
             await trx<ResultRow>('results')
                 .delete()
                 .where({round_id: roundId});
+
+            await this.updatePlayerRating(trx, roundRow.date);
 
             const futureRoundsIds = await this.getFutureRounds(trx, roundRow.date);
 
@@ -319,7 +345,8 @@ export default class RatingService {
         const roundRows = await builder<RoundRow>('rounds')
             .select()
             .where('date', '>', date)
-            .where({processed: true});
+            .where({processed: true})
+            .orderBy('date', 'asc');
         return roundRows.map(row => row.id);
     }
 
@@ -331,7 +358,7 @@ export default class RatingService {
             .select()
             .where({round_id: roundId});
 
-        if (!roundRow || roundRow.baskets == undefined) {
+        if (!roundRow || !roundRow.processed || roundRow.baskets == undefined) {
             throw new RatingError(RatingError.UNKNOWN);
         }
         const date = roundRow.date;
@@ -365,6 +392,15 @@ export default class RatingService {
         await builder<RatingRow>('ratings')
             .delete()
             .where({date: date});
+
+        // check for processed rounds at this date
+        const roundCountRow = await builder<RoundRow>('rounds')
+            .count({c: 'id'})
+            .where({processed: true, date: date});
+        const roundCount = roundCountRow[0].c;
+        if (!roundCount || roundCount === '0') {
+            return;
+        }
 
         const minBaskets = await this.getSetting('MinBaskets', date);
         const maxBaskets = await this.getSetting('MaxBaskets', date);

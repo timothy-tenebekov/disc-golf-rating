@@ -17,7 +17,7 @@ async function main() {
             throw usage();
         }
 
-        await ratingService.removeRound(roundId);
+        await ratingService.cancelRound(roundId);
         console.info(`Round removed`);
     }
     finally {
@@ -28,7 +28,7 @@ async function main() {
 }
 
 function usage() {
-    return 'Invalid params. Usage: node round-remove.js roundId';
+    return 'Invalid params. Usage: node round-cancel.js roundId';
 }
 
 main()

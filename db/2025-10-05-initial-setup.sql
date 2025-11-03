@@ -16,6 +16,7 @@ CREATE TABLE players (
 
 CREATE TABLE rounds (
     id           INTEGER NOT NULL,
+    processed    BOOLEAN NOT NULL,
     name         VARCHAR NOT NULL,
     date         DATE    NOT NULL,
     time         VARCHAR NOT NULL,
@@ -24,7 +25,6 @@ CREATE TABLE rounds (
     baskets      INTEGER,
     par_rating   INTEGER,
     point_rating REAL,
-    processed    BOOLEAN NOT NULL,
     PRIMARY KEY (id)
 );
 

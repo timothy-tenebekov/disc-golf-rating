@@ -8,6 +8,7 @@ export default class RatingError implements Error {
     static readonly ROUND_NOT_FOUND = 6;
     static readonly METRIX_ROUND_NOT_FOUND = 7;
     static readonly PLAYER_NOT_FOUND = 8;
+    static readonly ROUND_NOT_PROCESSED = 9;
 
     readonly code: number;
     readonly name: string;
