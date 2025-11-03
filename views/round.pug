@@ -27,13 +27,13 @@ block center-panel
                 td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
                 td(class="col-center")= val.playerRating
                 td(class="col-center")= val.roundRating
-    br
     if round.parRating > 0
+        br
         canvas#chart
 
 block script
     if round.parRating > 0
-        script(src='https://cdn.jsdelivr.net/npm/chart.js')
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
         script.
             const roundData = !{JSON.stringify(round)};
             const resultsData = !{JSON.stringify(results)};
@@ -48,7 +48,7 @@ block script
                     labels: results.map(item => item.metrixName),
                     datasets: [
                         {
-                            type: "scatter",
+                            type: 'scatter',
                             label: 'Результат',
                             data: results.map(item => ({
                                 x: item.result,
@@ -56,8 +56,8 @@ block script
                             }))
                         },
                         {
-                            type: "line",
-                            label: "Рейтинг",
+                            type: 'line',
+                            label: 'Рейтинг',
                             data: [[minResult, minRating], [maxResult, maxRating]]
                         }
                     ],

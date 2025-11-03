@@ -28,3 +28,62 @@ block center-panel
                 td(class="col-center" + extraClass)= (val.result > 0 ? "+" : "") + val.result
                 td(class="col-center" + extraClass)= val.rating
             - if (val.rating) baskets += val.baskets
+    if ratings.length > 0
+        br
+        canvas#chart
+
+block script
+    if ratings.length > 0
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        script(src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js")
+        script.
+            const roundsData = !{JSON.stringify(rounds)};
+            const ratingsData = !{JSON.stringify(ratings.filter(item => item.rating > 0))};
+            const ctx = document.getElementById('chart').getContext('2d');
+            new Chart(ctx, {
+                data: {
+                    datasets: [
+                        {
+                            type: "scatter",
+                            label: "Раунды",
+                            data: roundsData.map(item => ({
+                                x: item.date,
+                                y: item.rating
+                            }))
+                        },
+                        {
+                            type: 'line',
+                            label: 'Текущий рейтинг',
+                            data: ratingsData.map(item => ({
+                                x: item.date,
+                                y: item.rating
+                            }))
+                        }
+                    ],
+                },
+                options: {
+                    responsive: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'dd MMM yyyy',
+                                displayFormats: {
+                                    day: 'dd MMM'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            offset: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });

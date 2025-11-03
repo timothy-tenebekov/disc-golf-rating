@@ -48,6 +48,11 @@ export interface PlayerRoundData {
     rating: number;
 }
 
+export interface PlayerRatingData {
+    date: Date;
+    rating: number;
+}
+
 interface PlayerResult {
     id: number;
     result: number;
@@ -323,6 +328,17 @@ export default class RatingService {
             result: row.result,
             rating: row.round_rating
         } as PlayerRoundData));
+    }
+
+    async getPlayerRatings(playerId: number): Promise<PlayerRatingData[]> {
+        const ratingRows = await this.knex<RatingRow>('ratings')
+            .select()
+            .where({player_id: playerId})
+            .orderBy('date', 'asc');
+        return ratingRows.map(row => ({
+            date: row.date,
+            rating: row.rating
+        }));
     }
 
     private async getPlayerRating(builder: Knex, playerId: number, date: Date): Promise<number | null> {
