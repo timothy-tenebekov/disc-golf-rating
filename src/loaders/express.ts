@@ -11,6 +11,7 @@ export default (app: Application, ratingService: RatingService, metrixService: M
     app.set('trust proxy', true);
     app.set('views', './views');
     app.set('view engine', 'pug');
+    app.locals.formatDate = formatDate;
 
     app.use(compression());
     app.use(bodyParser.json());
@@ -42,3 +43,7 @@ const errorHandler = (
         },
     });
 };
+
+function formatDate(date: string): string {
+    return new Date(date).toLocaleDateString(process.env.LC_ALL);
+}

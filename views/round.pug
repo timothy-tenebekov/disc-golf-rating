@@ -7,7 +7,7 @@ block center-panel
     h2= 'Раунд: ' + round.name
     if round.courseName
         h4= 'Трасса: ' + round.courseName
-    h4= 'Дата: ' + new Date(round.date).toLocaleDateString()
+    h4= 'Дата: ' + formatDate(round.date)
     if round.baskets > 0
         h4= 'Корзин: ' + round.baskets
     if round.parRating > 0

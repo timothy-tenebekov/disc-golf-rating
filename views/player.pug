@@ -20,7 +20,7 @@ block center-panel
             tr
                 td.col-left(class={'col-grey': !val.active})
                     a(href= '/round/' + val.id)= val.name
-                td.col-center(class={'col-grey': !val.active})= new Date(val.date).toLocaleDateString()
+                td.col-center(class={'col-grey': !val.active})= formatDate(val.date)
                 td.col-left(class={'col-grey': !val.active})= val.courseName
                 td.col-center(class={'col-grey': !val.active})= val.baskets
                 td.col-center(class={'col-grey': !val.active})= (val.result > 0 ? "+" : "") + val.result
@@ -37,7 +37,7 @@ block script
             var chartRatings = ratings.map(item => ({
                 x: item.date,
                 y: item.rating,
-                date: new Date(item.date).toLocaleDateString()
+                date: formatDate(item.date)
             }));
             var chartRounds = rounds
                     .filter(item => item.rating > 0)
@@ -45,7 +45,7 @@ block script
                         x: item.date,
                         y: item.rating,
                         name: item.name,
-                        date: new Date(item.date).toLocaleDateString()
+                        date: formatDate(item.date)
                     }));
         script.
             const ratings = !{JSON.stringify(chartRatings)};

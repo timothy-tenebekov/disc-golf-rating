@@ -16,7 +16,7 @@ block center-panel
             tr
                 td.col-left
                     a(href= '/round/' + val.id)= val.name
-                td.col-center= new Date(val.date).toLocaleDateString()
+                td.col-center= formatDate(val.date)
                 td.col-left= val.courseName
                 td.col-center= val.baskets
                 td.col-center= val.parRating

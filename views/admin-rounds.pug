@@ -19,7 +19,7 @@ block center-panel
             tr
                 td.col-left
                     a(href= '/round/' + val.id)= val.name
-                td.col-center= new Date(val.date).toLocaleDateString()
+                td.col-center= formatDate(val.date)
                 td.col-center= val.processed ? 'Да' : 'Нет'
                 td.col-center
                     a(href= 'round/process/' + val.id)= val.processed ? 'Переобработка' : 'Обработка'
