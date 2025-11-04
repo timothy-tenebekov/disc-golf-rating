@@ -31,30 +31,42 @@ block center-panel
 
 block script
     if ratings.length > 0
-        script(src="https://cdn.jsdelivr.net/npm/chart.js")
-        script(src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js")
+        script(src='https://cdn.jsdelivr.net/npm/chart.js')
+        script(src='https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js')
+        -
+            var chartRatings = ratings.map(item => ({
+                x: item.date,
+                y: item.rating,
+                date: new Date(item.date).toLocaleDateString()
+            }));
+            var chartRounds = rounds
+                    .filter(item => item.rating > 0)
+                    .map(item => ({
+                        x: item.date,
+                        y: item.rating,
+                        name: item.name,
+                        date: new Date(item.date).toLocaleDateString()
+                    }));
         script.
-            const roundsData = !{JSON.stringify(rounds)};
-            const ratingsData = !{JSON.stringify(ratings.filter(item => item.rating > 0))};
+            const ratings = !{JSON.stringify(chartRatings)};
+            const rounds = !{JSON.stringify(chartRounds)};
             const ctx = document.getElementById('chart').getContext('2d');
             new Chart(ctx, {
                 data: {
                     datasets: [
                         {
-                            type: "scatter",
-                            label: "Раунды",
-                            data: roundsData.map(item => ({
-                                x: item.date,
-                                y: item.rating
-                            }))
+                            type: 'scatter',
+                            label: 'Раунды',
+                            data: rounds,
+                            order: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 5
                         },
                         {
                             type: 'line',
                             label: 'Текущий рейтинг',
-                            data: ratingsData.map(item => ({
-                                x: item.date,
-                                y: item.rating
-                            }))
+                            data: ratings,
+                            order: 1
                         }
                     ],
                 },
@@ -64,22 +76,40 @@ block script
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'day',
-                                tooltipFormat: 'dd MMM yyyy',
+                                unit: 'month',
                                 displayFormats: {
-                                    day: 'dd MMM'
+                                    month: 'MMM yy'
                                 }
                             },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            },
+                            offset: true
+                        },
+                        y: {
                             offset: true
                         }
                     },
                     plugins: {
                         legend: {
                             position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: () => '',
+                                label: function (context) {
+                                    if (context.datasetIndex === 1) {
+                                        return [
+                                            `Дата: ${context.raw.date}`,
+                                            `Рейтинг: ${context.raw.y}`
+                                        ];
+                                    } else if (context.datasetIndex === 0) {
+                                        return [
+                                            context.raw.name,
+                                            `Дата: ${context.raw.date}`,
+                                            `Рейтинг: ${context.raw.y}`
+                                        ];
+                                    }
+                                    return context.label;
+                                }
+                            }
                         }
                     }
                 }

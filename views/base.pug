@@ -10,4 +10,8 @@ html
                 block top-panel
             div(class="panel center-panel")
                 block center-panel
+        script.
+            function withSign(result) {
+                return (result > 0 ? '+' : '') + result;
+            }
         block script

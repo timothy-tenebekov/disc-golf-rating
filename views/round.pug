@@ -33,32 +33,41 @@ block center-panel
 
 block script
     if round.parRating > 0
-        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        script(src='https://cdn.jsdelivr.net/npm/chart.js')
+        -
+            var chartResults = results
+                    .filter(item => item.playerRating > 0)
+                    .map(item => ({
+                        x: item.result,
+                        y: item.playerRating,
+                        name: item.metrixName,
+                        rating: item.roundRating
+                    }));
+            const minX = chartResults.at(0).x;
+            const maxX = chartResults.at(-1).x;
+            const minY = round.parRating - round.pointRating * minX;
+            const maxY = round.parRating - round.pointRating * maxX;
+            var ratingLine = [[minX, minY], [maxX, maxY]];
         script.
-            const roundData = !{JSON.stringify(round)};
-            const resultsData = !{JSON.stringify(results)};
+            const results = !{JSON.stringify(chartResults)};
+            const line = !{JSON.stringify(ratingLine)};
             const ctx = document.getElementById('chart').getContext('2d');
-            const results = resultsData.filter(item => item.playerRating > 0);
-            const minResult = results.at(0).result;
-            const maxResult = results.at(-1).result;
-            const minRating = roundData.parRating - roundData.pointRating * minResult;
-            const maxRating = roundData.parRating - roundData.pointRating * maxResult;
             new Chart(ctx, {
+                type: 'scatter',
                 data: {
-                    labels: results.map(item => item.metrixName),
                     datasets: [
                         {
                             type: 'scatter',
                             label: 'Результат',
-                            data: results.map(item => ({
-                                x: item.result,
-                                y: item.playerRating
-                            }))
+                            data: results,
+                            pointRadius: 4,
+                            pointHoverRadius: 5
                         },
                         {
                             type: 'line',
                             label: 'Рейтинг',
-                            data: [[minResult, minRating], [maxResult, maxRating]]
+                            data: line,
+                            pointStyle: false
                         }
                     ],
                 },
@@ -67,14 +76,39 @@ block script
                     scales: {
                         x: {
                             reverse: true,
-                            min: minResult,
-                            max: maxResult,
+                            offset: true,
+                            ticks: {
+                                callback: (value) => withSign(value)
+                            }
+                        },
+                        y: {
                             offset: true
                         }
                     },
                     plugins: {
                         legend: {
                             position: 'bottom'
+                        },
+                        tooltip: {
+                            filter: (context) => context.datasetIndex !== 1,
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.datasetIndex === 0) {
+                                        const ratingDiff = context.raw.rating - context.raw.y;
+                                        return [
+                                            context.raw.name,
+                                            `Результат: ${withSign(context.raw.x)}`,
+                                            `Рейтинг: ${context.raw.y} → ${context.raw.rating} (${withSign(ratingDiff)})`
+                                        ];
+                                    } else if (context.datasetIndex === 1) {
+                                        return [
+                                            `Результат: ${withSign(context.parsed.x)}`,
+                                            `Рейтинг: ${context.parsed.y}`
+                                        ];
+                                    }
+                                    return context.label;
+                                }
+                            }
                         }
                     }
                 }
