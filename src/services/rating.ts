@@ -46,6 +46,7 @@ export interface PlayerRoundData {
     baskets: number;
     result: number;
     rating: number;
+    active: boolean;
 }
 
 export interface PlayerRatingData {
@@ -68,6 +69,9 @@ export default class RatingService {
     }
 
     async getSetting(name: string, date: Date): Promise<number> {
+        if (!date) {
+            date = new Date();
+        }
         const settingRow = await this.knex<SettingRow>('settings')
             .first()
             .where({name: name})
@@ -318,7 +322,8 @@ export default class RatingService {
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where({'a.player_id': playerId})
             .orderBy([{column: 'b.date', order: 'desc'}, {column: 'b.time', order: 'desc'}]) as ResultJoinedRoundRow[];
-        return resultRows.map(row => ({
+
+        const results = resultRows.map(row => ({
             id: row.round_id,
             name: row.name,
             date: row.date,
@@ -326,8 +331,20 @@ export default class RatingService {
             courseName: row.course_name,
             baskets: row.baskets,
             result: row.result,
-            rating: row.round_rating
+            rating: row.round_rating,
+            active: false
         } as PlayerRoundData));
+
+        const maxBaskets = await this.getSetting("MaxBaskets", new Date());
+        let baskets = 0;
+        for (const result of results) {
+            if (result.rating > 0 && baskets < maxBaskets) {
+                result.active = true;
+                baskets += result.baskets;
+            }
+        }
+
+        return results;
     }
 
     async getPlayerRatings(playerId: number): Promise<PlayerRatingData[]> {

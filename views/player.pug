@@ -16,9 +16,8 @@ block center-panel
             th(class="col-center") Корзины
             th(class="col-center") Результат
             th(class="col-center") Рейтинг<br>за раунд
-        - var baskets = 0
         each val in rounds
-            - var extraClass = baskets >= maxBaskets ? " col-grey" : ""
+            - var extraClass = val.active ? "" : " col-grey"
             tr
                 td(class="col-left" + extraClass)
                     a(href= '/round/' + val.id)= val.name
@@ -27,7 +26,6 @@ block center-panel
                 td(class="col-center" + extraClass)= val.baskets
                 td(class="col-center" + extraClass)= (val.result > 0 ? "+" : "") + val.result
                 td(class="col-center" + extraClass)= val.rating
-            - if (val.rating) baskets += val.baskets
     if ratings.length > 0
         br
         canvas#chart

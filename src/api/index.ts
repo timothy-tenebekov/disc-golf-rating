@@ -74,13 +74,11 @@ class Router {
         }
         const player = await this.ratingService.getPlayer(playerId);
         const rounds = await this.ratingService.getPlayerRounds(playerId);
-        const maxBaskets = await this.ratingService.getSetting("MaxBaskets", new Date());
         const ratings = await this.ratingService.getPlayerRatings(playerId);
 
         res.render('player', {
             player: player,
             rounds: rounds,
-            maxBaskets: maxBaskets,
             ratings: ratings.map(value => ({date: Router.formatDate(value.date), rating: value.rating}))
         });
     };
