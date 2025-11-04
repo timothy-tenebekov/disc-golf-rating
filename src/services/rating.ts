@@ -378,7 +378,7 @@ export default class RatingService {
         const roundRows = await builder<RoundRow>('rounds')
             .select()
             .where('date', '>', date)
-            .where({processed: true})
+            .andWhere({processed: true})
             .orderBy('date', 'asc');
         return roundRows.map(row => row.id);
     }
@@ -426,11 +426,12 @@ export default class RatingService {
             .delete()
             .where({date: date});
 
-        // check for processed rounds at this date
-        const roundCountRow = await builder<RoundRow>('rounds')
+        // check for rounds with rating at this date
+        const roundCountRows = await builder<RoundRow>('rounds')
             .count({c: 'id'})
-            .where({processed: true, date: date});
-        const roundCount = roundCountRow[0].c;
+            .whereNotNull('par_rating')
+            .andWhere({date: date});
+        const roundCount = roundCountRows[0].c;
         if (!roundCount || roundCount === '0') {
             return;
         }
