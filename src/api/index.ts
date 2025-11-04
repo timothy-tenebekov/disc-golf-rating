@@ -39,9 +39,9 @@ class Router {
         const dates = await this.ratingService.getRatingDates();
 
         res.render('rating', {
-            date: ratingsData ? Router.formatDate(ratingsData.date) : null,
+            date: ratingsData ? ratingsData.date : null,
             ratings: ratingsData ? ratingsData.ratings : null,
-            dates: dates.map(value => ({original: value, formatted: Router.formatDate(value)}))
+            dates: dates
         });
     };
 
@@ -79,7 +79,7 @@ class Router {
         res.render('player', {
             player: player,
             rounds: rounds,
-            ratings: ratings.map(value => ({date: Router.formatDate(value.date), rating: value.rating}))
+            ratings: ratings
         });
     };
 
@@ -136,8 +136,4 @@ class Router {
 
         res.redirect('/admin/rounds');
     };
-
-    private static formatDate(date: Date): string {
-        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-    }
 }

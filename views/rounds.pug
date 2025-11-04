@@ -7,16 +7,16 @@ block center-panel
     h2 Раунды
     table
         tr
-            th(class="col-center") Название
-            th(class="col-center") Дата
-            th(class="col-center") Трасса
-            th(class="col-center") Корзины
-            th(class="col-center") Рейтинг<br>пара
+            th.col-center Название
+            th.col-center Дата
+            th.col-center Трасса
+            th.col-center Корзины
+            th.col-center Рейтинг<br>пара
         each val in rounds
             tr
-                td(class="col-left")
+                td.col-left
                     a(href= '/round/' + val.id)= val.name
-                td(class="col-center")= val.date.toLocaleDateString()
-                td(class="col-left")= val.courseName
-                td(class="col-center")= val.baskets
-                td(class="col-center")= val.parRating
+                td.col-center= new Date(val.date).toLocaleDateString()
+                td.col-left= val.courseName
+                td.col-center= val.baskets
+                td.col-center= val.parRating

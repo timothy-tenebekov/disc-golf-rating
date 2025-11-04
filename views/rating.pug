@@ -9,16 +9,16 @@ block center-panel
             label(for="date") Рейтинг на
             select#date(name="date" onchange="window.location = '/rating/' + this.value")
                 each val in dates
-                    option(value=val.formatted selected=(val.formatted === date))= val.original.toLocaleDateString()
+                    option(value=val selected=(val === date))= new Date(val).toLocaleDateString()
     else
         h4 Рейтинг не найден
     if ratings
         table
             tr
-                th(class="col-center") Игрок
-                th(class="col-center") Рейтинг
+                th.col-center Игрок
+                th.col-center Рейтинг
             each val in ratings
                 tr
-                    td(class="col-left")
+                    td.col-left
                         a(href= '/player/' + val.id)= val.metrixName
-                    td(class="col-center")= val.rating
+                    td.col-center= val.rating

@@ -34,9 +34,9 @@ export interface ResultRow {
 }
 
 export interface ResultJoinedRoundRow extends ResultRow {
-    date: Date | null;
+    date: Date;
+    name: string;
     baskets: number | null;
-    name: string | null;
     course_id: number | null;
     course_name: string | null;
 }

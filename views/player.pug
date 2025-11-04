@@ -10,22 +10,21 @@ block center-panel
         a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
     table
         tr
-            th(class="col-center") Раунд
-            th(class="col-center") Дата
-            th(class="col-center") Трасса
-            th(class="col-center") Корзины
-            th(class="col-center") Результат
-            th(class="col-center") Рейтинг<br>за раунд
+            th.col-center Раунд
+            th.col-center Дата
+            th.col-center Трасса
+            th.col-center Корзины
+            th.col-center Результат
+            th.col-center Рейтинг<br>за раунд
         each val in rounds
-            - var extraClass = val.active ? "" : " col-grey"
             tr
-                td(class="col-left" + extraClass)
+                td.col-left(class={'col-grey': !val.active})
                     a(href= '/round/' + val.id)= val.name
-                td(class="col-center" + extraClass)= val.date.toLocaleDateString()
-                td(class="col-left" + extraClass)= val.courseName
-                td(class="col-center" + extraClass)= val.baskets
-                td(class="col-center" + extraClass)= (val.result > 0 ? "+" : "") + val.result
-                td(class="col-center" + extraClass)= val.rating
+                td.col-center(class={'col-grey': !val.active})= new Date(val.date).toLocaleDateString()
+                td.col-left(class={'col-grey': !val.active})= val.courseName
+                td.col-center(class={'col-grey': !val.active})= val.baskets
+                td.col-center(class={'col-grey': !val.active})= (val.result > 0 ? "+" : "") + val.result
+                td.col-center(class={'col-grey': !val.active})= val.rating
     if ratings.length > 0
         br
         canvas#chart

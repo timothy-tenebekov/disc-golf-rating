@@ -7,7 +7,7 @@ block center-panel
     h2= 'Раунд: ' + round.name
     if round.courseName
         h4= 'Трасса: ' + round.courseName
-    h4= 'Дата: ' + round.date.toLocaleDateString()
+    h4= 'Дата: ' + new Date(round.date).toLocaleDateString()
     if round.baskets > 0
         h4= 'Корзин: ' + round.baskets
     if round.parRating > 0
@@ -16,17 +16,17 @@ block center-panel
         a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
     table
         tr
-            th(class="col-center") Игрок
-            th(class="col-center") Результат
-            th(class="col-center") Текущий<br>рейтинг
-            th(class="col-center") Рейтинг<br>за раунд
+            th.col-center Игрок
+            th.col-center Результат
+            th.col-center Текущий<br>рейтинг
+            th.col-center Рейтинг<br>за раунд
         each val in results
             tr
-                td(class="col-left")
+                td.col-left
                     a(href= '/player/' + val.id)= val.metrixName
-                td(class="col-center")= (val.result > 0 ? "+" : "") + val.result
-                td(class="col-center")= val.playerRating
-                td(class="col-center")= val.roundRating
+                td.col-center= (val.result > 0 ? "+" : "") + val.result
+                td.col-center= val.playerRating
+                td.col-center= val.roundRating
     if round.parRating > 0
         br
         canvas#chart

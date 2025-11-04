@@ -13,14 +13,14 @@ export interface PlayerData {
 }
 
 export interface RatingsData {
-    date: Date;
+    date: string;
     ratings: PlayerData[];
 }
 
 export interface RoundData {
     id: number;
     name: string;
-    date: Date;
+    date: string;
     courseId: number | null;
     courseName: string | null;
     baskets: number | null;
@@ -40,7 +40,7 @@ export interface RoundPlayerResultData {
 export interface PlayerRoundData {
     id: number;
     name: string;
-    date: Date;
+    date: string;
     courseId: number;
     courseName: string;
     baskets: number;
@@ -50,7 +50,7 @@ export interface PlayerRoundData {
 }
 
 export interface PlayerRatingData {
-    date: Date;
+    date: string;
     rating: number;
 }
 
@@ -228,14 +228,14 @@ export default class RatingService {
             metrixName: row.metrix_name,
             rating: row.rating
         } as PlayerData));
-        return {date: ratingDate, ratings: ratings};
+        return {date: RatingService.formatDate(ratingDate), ratings: ratings};
     }
 
-    async getRatingDates(): Promise<Date[]> {
+    async getRatingDates(): Promise<string[]> {
         const ratingRows = await this.knex<RatingRow>('ratings')
             .distinct('date')
             .orderBy('date', 'desc');
-        return ratingRows.map(row => row.date);
+        return ratingRows.map(row => RatingService.formatDate(row.date));
     }
 
     async getRoundIdsForProcess(force: boolean): Promise<number[]> {
@@ -259,7 +259,7 @@ export default class RatingService {
         return roundRows.map(row => ({
             id: row.id,
             name: row.name,
-            date: row.date,
+            date: RatingService.formatDate(row.date),
             courseId: row.course_id,
             courseName: row.course_name,
             baskets: row.baskets,
@@ -280,7 +280,7 @@ export default class RatingService {
         return {
             id: roundRow.id,
             name: roundRow.name,
-            date: roundRow.date,
+            date: RatingService.formatDate(roundRow.date),
             courseId: roundRow.course_id,
             courseName: roundRow.course_name,
             baskets: roundRow.baskets,
@@ -326,7 +326,7 @@ export default class RatingService {
         const results = resultRows.map(row => ({
             id: row.round_id,
             name: row.name,
-            date: row.date,
+            date: RatingService.formatDate(row.date),
             courseId: row.course_id,
             courseName: row.course_name,
             baskets: row.baskets,
@@ -353,9 +353,9 @@ export default class RatingService {
             .where({player_id: playerId})
             .orderBy('date', 'asc');
         return ratingRows.map(row => ({
-            date: row.date,
+            date: RatingService.formatDate(row.date),
             rating: row.rating
-        }));
+        } as PlayerRatingData));
     }
 
     private async getPlayerRating(builder: Knex, playerId: number, date: Date): Promise<number | null> {
@@ -514,5 +514,9 @@ export default class RatingService {
         }
 
         return [a, b];
+    }
+
+    private static formatDate(date: Date): string {
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
     }
 }
