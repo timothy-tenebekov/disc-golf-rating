@@ -35,12 +35,12 @@ class Router {
     private readonly rating: RouterCallback = async (req, res) => {
         const dateStr = req.params['date'];
         const date = new Date(dateStr ? Date.parse(dateStr) : Date.now());
-        const ratingsData = await this.ratingService.getRatings(date);
+        const ratings = await this.ratingService.getRatings(date);
         const dates = await this.ratingService.getRatingDates();
 
         res.render('rating', {
-            date: ratingsData ? ratingsData.date : null,
-            ratings: ratingsData ? ratingsData.ratings : null,
+            date: ratings ? ratings.date : null,
+            ratings: ratings ? ratings.ratings : null,
             dates: dates
         });
     };

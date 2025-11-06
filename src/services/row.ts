@@ -49,11 +49,13 @@ export interface RatingRow {
     player_id: number;
     date: Date;
     rating: number;
+    rank: number;
 }
 
 export interface RatingJoinedPlayerRow {
     player_id: number;
     date: Date;
     rating: number;
+    rank: number;
     metrix_name: string;
 }

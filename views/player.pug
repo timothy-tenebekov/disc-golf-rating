@@ -5,7 +5,7 @@ block head
 
 block center-panel
     h2= 'Игрок: ' + player.metrixName
-    h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
+    h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет') + '\tМесто: ' + (player.rank > 0 ? player.rank : 'нет')
     h4
         a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
     table
@@ -78,7 +78,7 @@ block script
                             time: {
                                 unit: 'month',
                                 displayFormats: {
-                                    month: 'MMM yy'
+                                    month: 'MMM yyyy'
                                 }
                             },
                             offset: true

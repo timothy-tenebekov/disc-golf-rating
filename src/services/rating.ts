@@ -10,6 +10,7 @@ export interface PlayerData {
     id: number;
     metrixName: string;
     rating: number | null;
+    rank: number | null;
 }
 
 export interface RatingsData {
@@ -226,7 +227,8 @@ export default class RatingService {
         const ratings = ratingRows.map(row => ({
             id: row.player_id,
             metrixName: row.metrix_name,
-            rating: row.rating
+            rating: row.rating,
+            rank: row.rank
         } as PlayerData));
         return {date: RatingService.formatDate(ratingDate), ratings: ratings};
     }
@@ -312,8 +314,13 @@ export default class RatingService {
         if (!playerRow) {
             throw new RatingError(RatingError.PLAYER_NOT_FOUND);
         }
-        const rating = await this.getPlayerRating(this.knex, playerId, new Date(Date.now()));
-        return {id: playerId, metrixName: playerRow.metrix_name, rating: rating};
+        const ratingRow = await this.knex<RatingRow>('ratings')
+            .first()
+            .where({player_id: playerId})
+            .orderBy('date', 'desc');
+        const rating = ratingRow ? ratingRow.rating : null;
+        const rank = ratingRow ? ratingRow.rank : null;
+        return {id: playerId, metrixName: playerRow.metrix_name, rating: rating, rank: rank};
     }
 
     async getPlayerRounds(playerId: number): Promise<PlayerRoundData[]> {
@@ -472,9 +479,22 @@ export default class RatingService {
             ratings.set(playerId, Math.round(sum / baskets));
         }
 
+        const sortedRatings: [number, number][] = [];
         for (const rating of ratings) {
+            sortedRatings.push(rating);
+        }
+        sortedRatings.sort((x, y) => y[1] - x[1]);
+        let rank = 0;
+        let curRating = Infinity;
+        let curRank = rank;
+        for (const rating of sortedRatings) {
+            rank++;
+            if (rating[1] != curRating) {
+                curRating = rating[1];
+                curRank = rank;
+            }
             await builder<RatingRow>('ratings')
-                .insert({player_id: rating[0], date: date, rating: rating[1]});
+                .insert({player_id: rating[0], date: date, rating: curRating, rank: curRank});
         }
     }
 

@@ -15,10 +15,12 @@ block center-panel
     if ratings
         table
             tr
+                th.col-center Место
                 th.col-center Игрок
                 th.col-center Рейтинг
             each val in ratings
                 tr
+                    td.col-center= val.rank
                     td.col-left
                         a(href= '/player/' + val.id)= val.metrixName
                     td.col-center= val.rating

@@ -41,6 +41,7 @@ CREATE TABLE ratings (
     player_id INTEGER NOT NULL,
     date      DATE    NOT NULL,
     rating    INTEGER NOT NULL,
+    rank      INTEGER NOT NULL,
     PRIMARY KEY (player_id, date)
 );
 
