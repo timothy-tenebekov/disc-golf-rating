@@ -453,7 +453,7 @@ export default class RatingService {
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where('b.date', '>', minDate)
             .andWhere('b.date', '<', maxDate)
-            .orderBy([{column: 'a.player_id'}, {column: 'b.date', order: 'desc'}]) as ResultJoinedRoundRow[];
+            .orderBy([{column: 'a.player_id'}, {column: 'b.date', order: 'desc'}, {column: 'b.time', order: 'desc'}]) as ResultJoinedRoundRow[];
         const ratings: Map<number, number> = new Map();
         let playerId = 0;
         let sum = 0;
