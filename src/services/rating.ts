@@ -1,21 +1,37 @@
 import {Knex} from 'knex';
 import RatingError from './error';
 import {
-    PlayerRow, RatingJoinedPlayerRow, RatingRow,
-    ResultJoinedPlayerRow, ResultJoinedRoundRow, ResultRow, RoundRow, SettingRow
+    Gender,
+    PlayerRow,
+    RatingJoinedPlayerRow,
+    RatingRow,
+    ResultJoinedPlayerRow,
+    ResultJoinedRoundRow,
+    ResultRow,
+    RoundRow,
+    SettingRow
 } from "./row";
 import {MetrixRoundResult} from "./metrix";
 
 export interface PlayerData {
     id: number;
-    metrixName: string;
+    name: string;
+    gender: Gender | null;
     rating: number | null;
     rank: number | null;
+    genderRank: number | null;
+}
+
+export interface RatingPlayerData {
+    id: number;
+    name: string;
+    rating: number;
+    rank: number;
 }
 
 export interface RatingsData {
     date: string;
-    ratings: PlayerData[];
+    ratings: RatingPlayerData[];
 }
 
 export interface RoundData {
@@ -32,7 +48,7 @@ export interface RoundData {
 
 export interface RoundPlayerResultData {
     id: number;
-    metrixName: string;
+    name: string;
     result: number;
     playerRating: number;
     roundRating: number;
@@ -210,7 +226,7 @@ export default class RatingService {
         });
     }
 
-    async getRatings(date: Date): Promise<RatingsData | null> {
+    async getRatings(date: Date, gender: Gender | null): Promise<RatingsData | null> {
         const ratingRow = await this.knex('ratings')
             .max({max_date: 'date'})
             .where('date', '<=', date)
@@ -223,13 +239,18 @@ export default class RatingService {
             .select()
             .leftJoin({p: 'players'}, {'r.player_id': 'p.id'})
             .where({'r.date': ratingDate})
+            .modify((builder) => {
+                if (gender) {
+                    builder.where('p.gender', gender);
+                }
+            })
             .orderBy('r.rating', 'desc') as RatingJoinedPlayerRow[];
         const ratings = ratingRows.map(row => ({
             id: row.player_id,
-            metrixName: row.metrix_name,
+            name: RatingService.formatName(row.metrix_name, row.first_name, row.last_name),
             rating: row.rating,
-            rank: row.rank
-        } as PlayerData));
+            rank: gender ? row.gender_rank : row.rank
+        } as RatingPlayerData));
         return {date: RatingService.formatDate(ratingDate), ratings: ratings};
     }
 
@@ -300,7 +321,7 @@ export default class RatingService {
             .orderBy('r.result');
         return resultRows.map(row => ({
             id: row.player_id,
-            metrixName: row.metrix_name,
+            name: RatingService.formatName(row.metrix_name, row.first_name, row.last_name),
             result: row.result,
             playerRating: row.player_rating,
             roundRating: row.round_rating
@@ -318,9 +339,14 @@ export default class RatingService {
             .first()
             .where({player_id: playerId})
             .orderBy('date', 'desc');
-        const rating = ratingRow ? ratingRow.rating : null;
-        const rank = ratingRow ? ratingRow.rank : null;
-        return {id: playerId, metrixName: playerRow.metrix_name, rating: rating, rank: rank};
+        return {
+            id: playerId,
+            name: RatingService.formatName(playerRow.metrix_name, playerRow.first_name, playerRow.last_name),
+            gender: playerRow.gender,
+            rating: ratingRow ? ratingRow.rating : null,
+            rank: ratingRow ? ratingRow.rank : null,
+            genderRank: ratingRow ? ratingRow.gender_rank : null
+        };
     }
 
     async getPlayerRounds(playerId: number): Promise<PlayerRoundData[]> {
@@ -443,6 +469,12 @@ export default class RatingService {
             return;
         }
 
+        const playersRows = await builder<PlayerRow>('players');
+        const genders: Map<number, Gender | null> = new Map();
+        for (const player of playersRows) {
+            genders.set(player.id, player.gender);
+        }
+
         const minBaskets = await this.getSetting('MinBaskets', date);
         const maxBaskets = await this.getSetting('MaxBaskets', date);
         const minDate = new Date(date.getFullYear() - 1, date.getMonth(), date.getDate());
@@ -453,7 +485,10 @@ export default class RatingService {
             .leftJoin({b: 'rounds'}, {'a.round_id': 'b.id'})
             .where('b.date', '>', minDate)
             .andWhere('b.date', '<', maxDate)
-            .orderBy([{column: 'a.player_id'}, {column: 'b.date', order: 'desc'}, {column: 'b.time', order: 'desc'}]) as ResultJoinedRoundRow[];
+            .orderBy([{column: 'a.player_id'}, {column: 'b.date', order: 'desc'}, {
+                column: 'b.time',
+                order: 'desc'
+            }]) as ResultJoinedRoundRow[];
         const ratings: Map<number, number> = new Map();
         let playerId = 0;
         let sum = 0;
@@ -480,10 +515,22 @@ export default class RatingService {
         }
 
         const sortedRatings: [number, number][] = [];
+        const sortedGenderRatings: Map<Gender, [number, number][]> = new Map();
+        Object.values(Gender).forEach(value => {
+            sortedGenderRatings.set(value, []);
+        })
         for (const rating of ratings) {
             sortedRatings.push(rating);
+            const gender = genders.get(rating[0]);
+            const genderRatings = gender ? sortedGenderRatings.get(gender) : undefined;
+            if (genderRatings) {
+                genderRatings.push(rating);
+            }
         }
         sortedRatings.sort((x, y) => y[1] - x[1]);
+        sortedGenderRatings.values().forEach(value => {
+            value.sort((x, y) => y[1] - x[1]);
+        })
         let rank = 0;
         let curRating = Infinity;
         let curRank = rank;
@@ -495,6 +542,22 @@ export default class RatingService {
             }
             await builder<RatingRow>('ratings')
                 .insert({player_id: rating[0], date: date, rating: curRating, rank: curRank});
+        }
+
+        for (const genderRatings of sortedGenderRatings.values()) {
+            let rank = 0;
+            let curRating = Infinity;
+            let curRank = rank;
+            for (const rating of genderRatings) {
+                rank++;
+                if (rating[1] != curRating) {
+                    curRating = rating[1];
+                    curRank = rank;
+                }
+                await builder<RatingRow>('ratings')
+                    .update({gender_rank: curRank})
+                    .where({player_id: rating[0], date: date});
+            }
         }
     }
 
@@ -539,5 +602,9 @@ export default class RatingService {
 
     private static formatDate(date: Date): string {
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    }
+
+    private static formatName(metrixName: string, firstName: string | null, lastName: string | null): string {
+        return firstName && lastName ? firstName + ' ' + lastName : metrixName;
     }
 }

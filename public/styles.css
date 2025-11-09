@@ -97,6 +97,10 @@ label, select, button {
     #background-color: #f0f0f0;
 }
 
+.horz-container {
+    flex-direction: row;
+}
+
 #chart {
     width: 700px;
     max-width: 100%;

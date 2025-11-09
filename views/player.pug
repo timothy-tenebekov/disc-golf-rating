@@ -4,8 +4,16 @@ block head
     title Игрок
 
 block center-panel
-    h2= 'Игрок: ' + player.metrixName
-    h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет') + '\tМесто: ' + (player.rank > 0 ? player.rank : 'нет')
+    h2= 'Игрок: ' + player.name
+    div.container.horz-container
+        div.panel
+            h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
+        div.panel
+            h4= 'Место: ' + (player.rank > 0 ? player.rank : 'нет')
+        if player.gender
+            div.panel
+                h4= 'Место (' + (player.gender == 'male' ? 'М' : 'Ж') + '): ' + player.genderRank
+
     h4
         a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
     table

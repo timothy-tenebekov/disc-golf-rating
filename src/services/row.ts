@@ -1,3 +1,8 @@
+export enum Gender {
+    Male = 'male',
+    Female = 'female'
+}
+
 export interface SettingRow {
     name: string;
     date: Date;
@@ -9,6 +14,7 @@ export interface PlayerRow {
     metrix_name: string;
     first_name: string | null;
     last_name: string | null;
+    gender: Gender | null;
     initial_rating: number | null;
 }
 
@@ -50,12 +56,11 @@ export interface RatingRow {
     date: Date;
     rating: number;
     rank: number;
+    gender_rank: number | null;
 }
 
-export interface RatingJoinedPlayerRow {
-    player_id: number;
-    date: Date;
-    rating: number;
-    rank: number;
+export interface RatingJoinedPlayerRow extends RatingRow {
     metrix_name: string;
+    first_name: string | null;
+    last_name: string | null;
 }

@@ -1,3 +1,5 @@
+CREATE TYPE gender AS ENUM ('male', 'female');
+
 CREATE TABLE settings (
     name  VARCHAR NOT NULL,
     date  DATE    NOT NULL,
@@ -10,6 +12,7 @@ CREATE TABLE players (
     metrix_name    VARCHAR NOT NULL,
     first_name     VARCHAR,
     last_name      VARCHAR,
+    gender         gender,
     initial_rating INTEGER,
     PRIMARY KEY (id)
 );
@@ -38,10 +41,11 @@ CREATE TABLE results (
 );
 
 CREATE TABLE ratings (
-    player_id INTEGER NOT NULL,
-    date      DATE    NOT NULL,
-    rating    INTEGER NOT NULL,
-    rank      INTEGER NOT NULL,
+    player_id   INTEGER NOT NULL,
+    date        DATE    NOT NULL,
+    rating      INTEGER NOT NULL,
+    rank        INTEGER NOT NULL,
+    gender_rank INTEGER,
     PRIMARY KEY (player_id, date)
 );
 

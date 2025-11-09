@@ -23,7 +23,7 @@ block center-panel
         each val in results
             tr
                 td.col-left
-                    a(href= '/player/' + val.id)= val.metrixName
+                    a(href= '/player/' + val.id)= val.name
                 td.col-center= (val.result > 0 ? "+" : "") + val.result
                 td.col-center= val.playerRating
                 td.col-center= val.roundRating
@@ -40,7 +40,7 @@ block script
                     .map(item => ({
                         x: item.result,
                         y: item.playerRating,
-                        name: item.metrixName,
+                        name: item.name,
                         rating: item.roundRating
                     }));
             const minX = chartResults.at(0).x;

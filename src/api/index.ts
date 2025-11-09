@@ -2,6 +2,7 @@ import Express from 'express';
 import RatingService from "../services/rating";
 import RatingError from "../services/error";
 import MetrixService from "../services/metrix";
+import {Gender} from "../services/row";
 
 export default (ratingService: RatingService, metrixService: MetrixService): Express.Router => {
     const router = new Router(ratingService, metrixService);
@@ -20,7 +21,7 @@ class Router {
         this.ratingService = ratingService;
         this.metrixService = metrixService;
 
-        this.router.get('/rating{/:date}', this.rating);
+        this.router.get('/rating{-:gender}{/:date}', this.rating);
         this.router.get('/rounds', this.rounds);
         this.router.get('/round/:id', this.round);
         this.router.get('/player/:id', this.player);
@@ -33,12 +34,15 @@ class Router {
     }
 
     private readonly rating: RouterCallback = async (req, res) => {
+        const genderStr = req.params['gender'];
         const dateStr = req.params['date'];
+        const gender = genderStr ? Router.parseGender(genderStr) : null;
         const date = new Date(dateStr ? Date.parse(dateStr) : Date.now());
-        const ratings = await this.ratingService.getRatings(date);
+        const ratings = await this.ratingService.getRatings(date, gender);
         const dates = await this.ratingService.getRatingDates();
 
         res.render('rating', {
+            gender: gender?.toString(),
             date: ratings ? ratings.date : null,
             ratings: ratings ? ratings.ratings : null,
             dates: dates
@@ -136,4 +140,12 @@ class Router {
 
         res.redirect('/admin/rounds');
     };
+
+    private static parseGender(str: string): Gender {
+        const key = Object.keys(Gender).find(k => Gender[k as keyof typeof Gender] === str);
+        if (!key) {
+            throw new RatingError(RatingError.INVALID_PARAMS);
+        }
+        return Gender[key as keyof typeof Gender];
+    }
 }

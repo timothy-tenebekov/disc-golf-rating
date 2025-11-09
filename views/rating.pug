@@ -6,8 +6,13 @@ block head
 block center-panel
     if date
         form#dateForm
+            label(for="gender") Тип
+            select#gender(name="gender")
+                option(value='' selected=(gender === null)) Общий
+                option(value='male' selected=(gender === 'male')) Мужской
+                option(value='female' selected=(gender === 'female')) Женский
             label(for="date") Рейтинг на
-            select#date(name="date" onchange="window.location = '/rating/' + this.value")
+            select#date(name="date")
                 each val in dates
                     option(value=val selected=(val === date))= formatDate(val)
     else
@@ -22,5 +27,28 @@ block center-panel
                 tr
                     td.col-center= val.rank
                     td.col-left
-                        a(href= '/player/' + val.id)= val.metrixName
+                        a(href= '/player/' + val.id)= val.name
                     td.col-center= val.rating
+
+block script
+    script.
+        const genderSelect = document.getElementById('gender');
+        const dateSelect = document.getElementById('date');
+
+        function buildUrl() {
+            const gender = genderSelect.value;
+            const date = dateSelect.value;
+            let url = '/rating';
+            if (gender) {
+                url += '-' + gender;
+            }
+            url += '/' + date;
+            return url;
+        }
+
+        function openLink() {
+            window.location = buildUrl();
+        }
+
+        genderSelect.addEventListener('change', openLink);
+        dateSelect.addEventListener('change', openLink);
