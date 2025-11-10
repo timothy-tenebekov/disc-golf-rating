@@ -3,31 +3,35 @@ extends base-admin.pug
 block head
     title Управление раудами
 
-block center-panel
-    h2 Раунды
-    form#roundForm
-        input#round(name="round")
-        button(type="submit") Добавить
-    table
-        tr
-            th.col-center Название
-            th.col-center Дата
-            th.col-rotate Обработан
-            th.col-center Обработка
-            th.col-center Отмена
-        each val in rounds
+block panel-main
+    div.panel.container.container-vert
+        div.panel.panel-stats
+            h2 Раунды
+    div.panel.panel-form
+        form#roundForm
+            input#round(name="round")
+            button(type="submit") Добавить
+    div.panel.panel-table
+        table
             tr
-                td.col-left
-                    a(href= '/round/' + val.id)= val.name
-                td.col-center= formatDate(val.date)
-                td.col-center= val.processed ? 'Да' : 'Нет'
-                td.col-center
-                    a(href= 'round/process/' + val.id)= val.processed ? 'Переобработка' : 'Обработка'
-                td.col-center
-                    if (val.processed)
-                        a(href= 'round/cancel/' + val.id) Отмена
-                    else
-                        a(href= 'round/remove/' + val.id) Удаление
+                th.column-center Название
+                th.column-center Дата
+                th.column-rotate Обработан
+                th.column-center Обработка
+                th.column-center Отмена
+            each val in rounds
+                tr
+                    td.column-left
+                        a(href= '/round/' + val.id)= val.name
+                    td.column-center= formatDate(val.date)
+                    td.column-center= val.processed ? 'Да' : 'Нет'
+                    td.column-center
+                        a(href= 'round/process/' + val.id)= val.processed ? 'Переобработка' : 'Обработка'
+                    td.column-center
+                        if (val.processed)
+                            a(href= 'round/cancel/' + val.id) Отмена
+                        else
+                            a(href= 'round/remove/' + val.id) Удаление
 
 block script
     script.

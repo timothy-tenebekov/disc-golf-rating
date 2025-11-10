@@ -3,39 +3,42 @@ extends base-main.pug
 block head
     title Игрок
 
-block center-panel
-    h2= 'Игрок: ' + player.name
-    div.container.horz-container
-        div.panel
-            h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
-        div.panel
-            h4= 'Место: ' + (player.rank > 0 ? player.rank : 'нет')
-        if player.gender
-            div.panel
-                h4= 'Место (' + (player.gender == 'male' ? 'М' : 'Ж') + '): ' + player.genderRank
-
-    h4
-        a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
-    table
-        tr
-            th.col-center Раунд
-            th.col-center Дата
-            th.col-center Трасса
-            th.col-rotate Корзины
-            th.col-rotate Результат
-            th.col-rotate Рейтинг за раунд
-        each val in rounds
+block panel-main
+    div.container.container-vert
+        div.panel.panel-stats
+            h2= 'Игрок: ' + player.name
+        div.panel.container.horz-container
+            div.panel-stats
+                h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
+            div.panel.panel-stats
+                h4= 'Место: ' + (player.rank > 0 ? player.rank : 'нет')
+            if player.gender
+                div.panel.panel-stats
+                    h4= 'Место (' + (player.gender == 'm' ? 'М' : 'Ж') + '): ' + (player.genderRank > 0 ? player.genderRank : 'нет')
+        div.panel.panel-stats
+            h4
+                a(href= 'https://discgolfmetrix.com/player/' + player.id target='_blank' rel='noopener noreferrer') Metrix
+    div.panel.panel-table
+        table
             tr
-                td.col-left(class={'col-grey': !val.active})
-                    a(href= '/round/' + val.id)= val.name
-                td.col-center(class={'col-grey': !val.active})= formatDate(val.date)
-                td.col-left(class={'col-grey': !val.active})= val.courseName
-                td.col-center(class={'col-grey': !val.active})= val.baskets
-                td.col-center(class={'col-grey': !val.active})= (val.result > 0 ? "+" : "") + val.result
-                td.col-center(class={'col-grey': !val.active})= val.rating
+                th.column-center Раунд
+                th.column-center Дата
+                th.column-center Трасса
+                th.column-rotate Корзины
+                th.column-rotate Результат
+                th.column-rotate Рейтинг за раунд
+            each val in rounds
+                tr
+                    td.column-left(class={'col-grey': !val.active})
+                        a(href= '/round/' + val.id)= val.name
+                    td.column-center(class={'col-grey': !val.active})= formatDate(val.date)
+                    td.column-left(class={'col-grey': !val.active})= val.courseName
+                    td.column-center(class={'col-grey': !val.active})= val.baskets
+                    td.column-center(class={'col-grey': !val.active})= (val.result > 0 ? "+" : "") + val.result
+                    td.column-center(class={'col-grey': !val.active})= val.rating
     if ratings.length > 0
-        br
-        canvas#chart
+        div.panel.panel-chart
+            canvas#chart
 
 block script
     if ratings.length > 0

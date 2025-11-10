@@ -45,60 +45,88 @@ th, td {
     max-width: 500px;
 }
 
-.col-left {
+label, select, button {
+    padding: 0 0.5rem;
+}
+
+form {
+    margin: 0.4rem 0;
+}
+
+h2, h3, h4 {
+    margin: 0.2rem 0;
+}
+
+.column-left {
     text-align: left;
 }
 
-.col-center {
+.column-center {
     text-align: center;
 }
 
-.col-rotate {
+.column-rotate {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
     text-align: center;
 }
 
-.col-grey {
+.column-grey {
     background-color: #e0e0e0;
-}
-
-label, select, button {
-    padding: 0 0.5rem;
 }
 
 .container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
-    #max-width: 100%;
     height: fit-content;
-    #max-height: 100%;
     margin: 0 auto;
+}
+
+.container-horz {
+    flex-direction: row;
+}
+
+.container-vert {
+    flex-direction: column;
 }
 
 .panel {
     width: fit-content;
-    max-width: 1200px;
-    min-height: 60px;
     margin: auto;
     padding: 0 0;
     box-sizing: border-box;
     text-align: center;
     overflow: auto;
+    #border: 0.1rem solid #c0c0c0;
 }
 
-.top-panel {
-    #background-color: #e8e8e8;
+.panel-menu {
+    padding: 0 5px;
 }
 
-.center-panel {
+.panel-main {
     padding: 5px 5px;
+    max-width: 1200px;
+    min-height: 60px;
     #background-color: #f0f0f0;
 }
 
-.horz-container {
-    flex-direction: row;
+.panel-menu-item {
+    padding: 0 5px;
+}
+
+.panel-stats {
+    padding: 0 5px;
+}
+
+.panel-form {
+}
+
+.panel-table {
+}
+
+.panel-chart {
+    padding: 10px 0;
 }
 
 #chart {

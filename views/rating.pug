@@ -3,32 +3,36 @@ extends base-main.pug
 block head
     title Рейтинг
 
-block center-panel
-    if date
-        form#dateForm
-            label(for="gender") Тип
-            select#gender(name="gender")
-                option(value='' selected=(gender === null)) Общий
-                option(value='male' selected=(gender === 'male')) Мужской
-                option(value='female' selected=(gender === 'female')) Женский
-            label(for="date") Рейтинг на
-            select#date(name="date")
-                each val in dates
-                    option(value=val selected=(val === date))= formatDate(val)
-    else
-        h4 Рейтинг не найден
-    if ratings
-        table
-            tr
-                th.col-center Место
-                th.col-center Игрок
-                th.col-center Рейтинг
-            each val in ratings
-                tr
-                    td.col-center= val.rank
-                    td.col-left
-                        a(href= '/player/' + val.id)= val.name
-                    td.col-center= val.rating
+block panel-main
+    div.panel.container.container-vert
+        if date
+            div.panel.panel-form
+                form#dateForm
+                    label(for="gender") Тип
+                    select#gender(name="gender")
+                        option(value='' selected=(gender === null)) Общий
+                        option(value='m' selected=(gender === 'm')) Мужской
+                        option(value='f' selected=(gender === 'f')) Женский
+                    label(for="date") Рейтинг на
+                    select#date(name="date")
+                        each val in dates
+                            option(value=val selected=(val === date))= formatDate(val)
+        else
+            div.panel.panel-stats
+                h4 Рейтинг не найден
+        if ratings
+            div.panel.panel-table
+                table
+                    tr
+                        th.column-center Место
+                        th.column-center Игрок
+                        th.column-center Рейтинг
+                    each val in ratings
+                        tr
+                            td.column-center= val.rank
+                            td.column-left
+                                a(href= '/player/' + val.id)= val.name
+                            td.column-center= val.rating
 
 block script
     script.

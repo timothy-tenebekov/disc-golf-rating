@@ -3,33 +3,45 @@ extends base-main.pug
 block head
     title Раунд
 
-block center-panel
-    h2= 'Раунд: ' + round.name
+block panel-main
+    div.container.container-vert
+        div.panel.panel-stats
+            h2= 'Раунд: ' + round.name
     if round.courseName
-        h4= 'Трасса: ' + round.courseName
-    h4= 'Дата: ' + formatDate(round.date)
-    if round.baskets > 0
-        h4= 'Корзин: ' + round.baskets
+        div.panel.panel-stats
+            h4= 'Трасса: ' + round.courseName
+    div.panel.container.container-horz
+        div.panel.panel-stats
+            h4= 'Дата: ' + formatDate(round.date)
+        if round.baskets > 0
+            div.panel.panel-stats
+                h4= 'Корзин: ' + round.baskets
     if round.parRating > 0
-        h4= 'Рейтинг пара: ' + round.parRating + ', очка: ' + round.pointRating
-    h4
-        a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
-    table
-        tr
-            th.col-center Игрок
-            th.col-center Результат
-            th.col-center Текущий<br>рейтинг
-            th.col-center Рейтинг<br>за раунд
-        each val in results
+        div.panel.container.container-horz
+            div.panel.panel-stats
+                h4= 'Рейтинг пара: ' + round.parRating
+            div.panel.panel-stats
+                h4= 'Рейтинг очка: ' + round.pointRating
+    div.panel.panel-stats
+        h4
+            a(href= 'https://discgolfmetrix.com/' + round.id target = '_blank' rel='noopener noreferrer') Metrix
+    div.panel.panel-table
+        table
             tr
-                td.col-left
-                    a(href= '/player/' + val.id)= val.name
-                td.col-center= (val.result > 0 ? "+" : "") + val.result
-                td.col-center= val.playerRating
-                td.col-center= val.roundRating
+                th.column-center Игрок
+                th.column-center Результат
+                th.column-center Текущий<br>рейтинг
+                th.column-center Рейтинг<br>за раунд
+            each val in results
+                tr
+                    td.column-left
+                        a(href= '/player/' + val.id)= val.name
+                    td.column-center= (val.result > 0 ? "+" : "") + val.result
+                    td.column-center= val.playerRating
+                    td.column-center= val.roundRating
     if round.parRating > 0
-        br
-        canvas#chart
+        div.panel.panel-chart
+            canvas#chart
 
 block script
     if round.parRating > 0

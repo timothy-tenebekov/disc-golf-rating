@@ -1,6 +1,6 @@
 export enum Gender {
-    Male = 'male',
-    Female = 'female'
+    Male = 'm',
+    Female = 'f'
 }
 
 export interface SettingRow {

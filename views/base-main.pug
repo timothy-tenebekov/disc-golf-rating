@@ -1,6 +1,10 @@
 extends base.pug
 
-block top-panel
-    h3
-        a(href="/rating") Рейтинг 
-        a(href="/rounds") Раунды
+block panel-menu
+    div.container.container-horz
+        div.panel.panel-menu-item
+            h3
+                a(href="/rating") Рейтинг
+        div.panel.panel-menu-item
+            h3
+                a(href="/rounds") Раунды

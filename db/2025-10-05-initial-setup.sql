@@ -1,4 +1,4 @@
-CREATE TYPE gender AS ENUM ('male', 'female');
+CREATE TYPE gender AS ENUM ('m', 'f');
 
 CREATE TABLE settings (
     name  VARCHAR NOT NULL,

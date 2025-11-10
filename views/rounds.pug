@@ -3,20 +3,23 @@ extends base-main.pug
 block head
     title Раунды
 
-block center-panel
-    h2 Раунды
-    table
-        tr
-            th.col-center Название
-            th.col-center Дата
-            th.col-center Трасса
-            th.col-rotate Корзины
-            th.col-rotate Рейтинг пара
-        each val in rounds
-            tr
-                td.col-left
-                    a(href= '/round/' + val.id)= val.name
-                td.col-center= formatDate(val.date)
-                td.col-left= val.courseName
-                td.col-center= val.baskets
-                td.col-center= val.parRating
+block panel-main
+    div.panel.container.container-vert
+        div.panel.panel-stats
+            h2 Раунды
+        div.panel.panel-table
+            table
+                tr
+                    th.column-center Название
+                    th.column-center Дата
+                    th.column-center Трасса
+                    th.column-rotate Корзины
+                    th.column-rotate Рейтинг пара
+                each val in rounds
+                    tr
+                        td.col-left
+                            a(href= '/round/' + val.id)= val.name
+                        td.column-center= formatDate(val.date)
+                        td.column-left= val.courseName
+                        td.column-center= val.baskets
+                        td.column-center= val.parRating
