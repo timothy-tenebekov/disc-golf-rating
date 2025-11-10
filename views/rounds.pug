@@ -10,16 +10,17 @@ block panel-main
         div.panel.panel-table
             table
                 tr
-                    th.column-center Название
+                    th.column-center Раунд
                     th.column-center Дата
                     th.column-center Трасса
                     th.column-rotate Корзины
                     th.column-rotate Рейтинг пара
                 each val in rounds
                     tr
-                        td.col-left
+                        - var inactive = !val.parRating;
+                        td.col-left(class={'column-inactive': inactive})
                             a(href= '/round/' + val.id)= val.name
-                        td.column-center= formatDate(val.date)
-                        td.column-left= val.courseName
-                        td.column-center= val.baskets
-                        td.column-center= val.parRating
+                        td.column-center(class={'column-inactive': inactive})= formatDate(val.date)
+                        td.column-left(class={'column-inactive': inactive})= val.courseName
+                        td.column-center(class={'column-inactive': inactive})= val.baskets
+                        td.column-center(class={'column-inactive': inactive})= val.parRating

@@ -6,10 +6,10 @@ block head
 block panel-main
     div.container.container-vert
         div.panel.panel-stats
-            h2= 'Игрок: ' + player.name
+            h2= player.name
         div.panel.container.horz-container
             div.panel-stats
-                h4= 'Текущий рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
+                h4= 'Рейтинг: ' + (player.rating > 0 ? player.rating : 'нет')
             div.panel.panel-stats
                 h4= 'Место: ' + (player.rank > 0 ? player.rank : 'нет')
             if player.gender
@@ -29,13 +29,13 @@ block panel-main
                 th.column-rotate Рейтинг за раунд
             each val in rounds
                 tr
-                    td.column-left(class={'col-grey': !val.active})
+                    td.column-left(class={'column-inactive': !val.active})
                         a(href= '/round/' + val.id)= val.name
-                    td.column-center(class={'col-grey': !val.active})= formatDate(val.date)
-                    td.column-left(class={'col-grey': !val.active})= val.courseName
-                    td.column-center(class={'col-grey': !val.active})= val.baskets
-                    td.column-center(class={'col-grey': !val.active})= (val.result > 0 ? "+" : "") + val.result
-                    td.column-center(class={'col-grey': !val.active})= val.rating
+                    td.column-center(class={'column-inactive': !val.active})= formatDate(val.date)
+                    td.column-left(class={'column-inactive': !val.active})= val.courseName
+                    td.column-center(class={'column-inactive': !val.active})= val.baskets
+                    td.column-center(class={'column-inactive': !val.active})= (val.result > 0 ? "+" : "") + val.result
+                    td.column-center(class={'column-inactive': !val.active})= val.rating
     if ratings.length > 0
         div.panel.panel-chart
             canvas#chart

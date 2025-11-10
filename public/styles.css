@@ -71,7 +71,7 @@ h2, h3, h4 {
     text-align: center;
 }
 
-.column-grey {
+.column-inactive {
     background-color: #e0e0e0;
 }
 
@@ -101,7 +101,7 @@ h2, h3, h4 {
 }
 
 .panel-menu {
-    padding: 0 5px;
+    padding: 5px 0 5px 5px;
 }
 
 .panel-main {
