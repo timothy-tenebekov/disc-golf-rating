@@ -18,7 +18,7 @@ block panel-main
                 each val in rounds
                     tr
                         - var inactive = !val.parRating;
-                        td.col-left(class={'column-inactive': inactive})
+                        td.column-left(class={'column-inactive': inactive})
                             a(href= '/round/' + val.id)= val.name
                         td.column-center(class={'column-inactive': inactive})= formatDate(val.date)
                         td.column-left(class={'column-inactive': inactive})= val.courseName
