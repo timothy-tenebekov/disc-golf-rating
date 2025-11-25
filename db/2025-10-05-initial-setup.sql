@@ -52,4 +52,4 @@ CREATE TABLE ratings (
 INSERT INTO settings
 VALUES ('MinBaskets', '2025-01-01', 9),
        ('MaxBaskets', '2025-01-01', 90),
-       ('MinBirdieDiff', '2025-01-01', 100);
+       ('MinBirdieDiff', '2025-01-01', 150);
