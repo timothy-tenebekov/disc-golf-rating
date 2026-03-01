@@ -39,11 +39,11 @@ const errorHandler = (
         success: false,
         error: {
             message,
-            ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+            ...(process.env.NODE_ENV === 'development' && {stack: err.stack}),
         },
     });
 };
 
 function formatDate(date: string): string {
-    return new Date(date).toLocaleDateString(process.env.LC_ALL);
+    return new Date(date).toLocaleDateString(process.env.LC_ALL, {year: '2-digit', month: '2-digit', day: '2-digit'});
 }
